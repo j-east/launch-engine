@@ -1,0 +1,109 @@
+{
+  "id": "cpt_hannah",
+  "name": "Hannah's Deep-Core App",
+  "productType": "digital",
+  "createdAt": "2026-06-22T18:00:00Z",
+  "updatedAt": "2026-06-22T18:00:00Z",
+  "currentStage": "mindmap",
+
+  "intake": {
+    "what": "A coaching app for deep-core training — transverse abdominis, pelvic floor, diaphragm, vagus nerve, and diaphragmatic breathwork. Coach-to-client, led by Hannah.",
+    "problem": "Generic fitness apps ignore the deepest, foundational core muscles. Pre/postnatal women, people with back pain, and stressed nervous systems have no guided, accountable program for training from the inside out.",
+    "why": "Hannah has coached this work in person for years and seen it change bodies that nothing else helped. The expertise is rare and the audience is underserved and motivated.",
+    "answers": {
+      "stage": "MVP exists; no public presence yet",
+      "differentiator": "Deep-core / nervous-system niche — narrow and defensible"
+    },
+    "evidence": {
+      "hasBuild": true,
+      "buildMaturity": "mvp",
+      "landingUrl": null,
+      "waitlistCount": 0,
+      "payingUsers": 0,
+      "monthlyRevenue": 0,
+      "customerConversations": 3,
+      "daysUntilTargetLaunch": 14
+    }
+  },
+
+  "diagnosis": {
+    "generatedAt": "2026-06-22T18:05:00Z",
+    "archetype": "builder",
+    "dominance": "left",
+    "balanceScore": 36,
+    "verdict": "You're Left-brained. You've built an MVP and validated almost nothing — no landing page, no waitlist, zero paying users. The next two weeks belong to the right hemisphere.",
+    "assessment": "Strong build, near-zero market signal. The MVP is real but only 3 customer conversations back it. The risk isn't the product breaking — it's launching to nobody. Every hour spent polishing the build right now is an hour avoiding the harder, scarier work of putting it in front of people and asking for money.",
+    "blindSpot": "Distribution. You have no surface where a stranger can find, want, and pay for this.",
+    "bluntness": 0.75,
+    "hemispheres": {
+      "left":  { "effort": 75, "need": 40 },
+      "right": { "effort": 18, "need": 82 }
+    }
+  },
+
+  "budget": {
+    "timeHrs": 60,
+    "money": 400,
+    "hourlyRate": 25,
+    "scenario": "balanced",
+    "variantTest": true,
+    "allocations": [
+      { "areaId": "area_warm",    "timeHrs": 3,  "money": 0,   "expectedLeads": 40, "expectedFounders": 10.0, "cpf": 7.5,  "funded": true },
+      { "areaId": "area_partner", "timeHrs": 6,  "money": 0,   "expectedLeads": 30, "expectedFounders": 4.5,  "cpf": 33.3, "funded": true },
+      { "areaId": "area_content", "timeHrs": 12, "money": 0,   "expectedLeads": 54, "expectedFounders": 4.3,  "cpf": 69.0, "funded": true },
+      { "areaId": "area_paid",    "timeHrs": 4,  "money": 350, "expectedLeads": 116,"expectedFounders": 11.6, "cpf": 38.8, "funded": true }
+    ],
+    "projection": {
+      "leads": 240,
+      "founders": 30.4,
+      "blendedCpf": 41.2,
+      "usedTimeHrs": 60,
+      "usedMoney": 400,
+      "kneeMoney": 510
+    }
+  },
+
+  "areas": [
+    { "id": "area_product",  "conceptId": "cpt_hannah", "hemisphere": "left",  "family": "product", "title": "Product / MVP",          "status": "overfed",  "effortSpent": 80, "effortNeeded": 40, "materiality": 0.7, "estTimeHrs": 4,  "estMoney": 0,   "threadId": "thr_product", "pruned": false },
+    { "id": "area_qa",       "conceptId": "cpt_hannah", "hemisphere": "left",  "family": "qa",      "title": "QA / polish",            "status": "overfed",  "effortSpent": 55, "effortNeeded": 25, "materiality": 0.6, "estTimeHrs": 2,  "estMoney": 0,   "pruned": true, "pruneReason": "Stop polishing — MVP is good enough to validate." },
+    { "id": "area_finance",  "conceptId": "cpt_hannah", "hemisphere": "left",  "family": "finance", "title": "Pricing / unit economics","status": "balanced", "effortSpent": 35, "effortNeeded": 45, "materiality": 0.2, "estTimeHrs": 3,  "estMoney": 50,  "threadId": "thr_finance", "pruned": false },
+
+    { "id": "area_idea",     "conceptId": "cpt_hannah", "hemisphere": "right", "family": "idea",    "title": "Validation / positioning","status": "starved", "effortSpent": 30, "effortNeeded": 70, "materiality": 0.1, "estTimeHrs": 5,  "estMoney": 0,   "threadId": "thr_idea", "pruned": false },
+    { "id": "area_content",  "conceptId": "cpt_hannah", "hemisphere": "right", "family": "content", "title": "Content & creative (3 videos)","status": "starved","effortSpent": 10, "effortNeeded": 85, "materiality": 0.5, "estTimeHrs": 12, "estMoney": 0,   "threadId": "thr_content", "pruned": false },
+    { "id": "area_warm",     "conceptId": "cpt_hannah", "hemisphere": "right", "family": "network", "title": "Warm outreach (network)","status": "starved",  "effortSpent": 5,  "effortNeeded": 80, "materiality": 0.0, "estTimeHrs": 3,  "estMoney": 0,   "threadId": "thr_warm", "pruned": false },
+    { "id": "area_partner",  "conceptId": "cpt_hannah", "hemisphere": "right", "family": "network", "title": "Partnerships (pelvic-floor PTs)","status": "starved","effortSpent": 0, "effortNeeded": 65, "materiality": 0.0, "estTimeHrs": 6, "estMoney": 0, "pruned": false },
+    { "id": "area_paid",     "conceptId": "cpt_hannah", "hemisphere": "right", "family": "paid",    "title": "Paid ads + variant test","status": "starved",  "effortSpent": 0,  "effortNeeded": 55, "materiality": 0.4, "estTimeHrs": 4,  "estMoney": 350, "threadId": "thr_paid", "pruned": false },
+    { "id": "area_appstore", "conceptId": "cpt_hannah", "hemisphere": "right", "family": "appstore","title": "App Store listing / ASO","status": "balanced", "effortSpent": 20, "effortNeeded": 35, "materiality": 0.5, "estTimeHrs": 3,  "estMoney": 0,   "pruned": false }
+  ],
+
+  "tasks": [
+    { "id": "tsk_lp",    "areaId": "area_content", "title": "Build waitlist landing page",                 "done": false, "estTimeHrs": 14, "estMoney": 50, "materiality": 0.6 },
+    { "id": "tsk_lead",  "areaId": "area_content", "title": "Record '5-min deep-core + breath reset' magnet","done": false, "estTimeHrs": 8,  "estMoney": 0,  "materiality": 0.5 },
+    { "id": "tsk_reels", "areaId": "area_content", "title": "Film 6 reels (postpartum / back / nervous-system angles)","done": false, "estTimeHrs": 12, "estMoney": 0, "materiality": 0.5 },
+    { "id": "tsk_dm",    "areaId": "area_warm",    "title": "DM/text existing + lapsed clients",            "done": false, "estTimeHrs": 3,  "estMoney": 0,  "materiality": 0.0 },
+    { "id": "tsk_pt",    "areaId": "area_partner", "title": "Pitch 2 pelvic-floor PTs on referral",         "done": false, "estTimeHrs": 6,  "estMoney": 0,  "materiality": 0.0 }
+  ],
+
+  "threads": [
+    { "id": "thr_content", "conceptId": "cpt_hannah", "areaId": "area_content", "title": "Content & creative" }
+  ],
+
+  "messages": [
+    { "id": "msg_1", "threadId": "thr_content", "role": "assistant", "content": "Your content area is starved (effort 10 / need 85) and it's the gateway to everything else — no landing page means no waitlist, no paid test, nothing. Of every channel, which feels hardest right now?", "at": "2026-06-22T18:10:00Z" },
+    { "id": "msg_2", "threadId": "thr_content", "role": "user", "content": "Honestly the 3 videos. I don't know what to say or how to make them not cringe.", "at": "2026-06-22T18:11:00Z" },
+    { "id": "msg_3", "threadId": "thr_content", "role": "assistant", "content": "Then we make exactly 3, one per angle, each 20-30s: (1) Postpartum — 'the muscle no one trained after your baby', (2) Back pain — 'your core is deeper than your abs', (3) Nervous system — 'breathe to brace'. Same B-roll of you coaching the breath; just swap the hook. Want the scripts?", "at": "2026-06-22T18:11:30Z" }
+  ],
+
+  "schedule": [
+    { "id": "day_1", "conceptId": "cpt_hannah", "date": "2026-06-23", "dayIndex": 1, "budgetPlanned": 50, "activities": [
+      { "id": "act_1a", "areaId": "area_content", "taskId": "tsk_lp",   "title": "Landing page — structure + copy",   "hemisphere": "right", "estTimeHrs": 6, "estMoney": 50, "done": false },
+      { "id": "act_1b", "areaId": "area_warm",    "taskId": "tsk_dm",   "title": "Draft outreach message to clients", "hemisphere": "right", "estTimeHrs": 1, "estMoney": 0,  "done": false }
+    ] },
+    { "id": "day_2", "conceptId": "cpt_hannah", "date": "2026-06-24", "dayIndex": 2, "budgetPlanned": 0, "activities": [
+      { "id": "act_2a", "areaId": "area_content", "taskId": "tsk_lp",   "title": "Landing page — finish + publish",   "hemisphere": "right", "estTimeHrs": 8, "estMoney": 0,  "done": false }
+    ] }
+  ],
+
+  "checkins": [],
+  "media": []
+}

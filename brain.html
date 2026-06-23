@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Launch Engine · Action Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0E0F12; --panel:#16181D; --panel-2:#1A1D23; --line:#262A31;
+    --ink:#ECE9E3; --ink-2:#B9B4AA; --muted:#7C766C; --faint:#534E46;
+    --left:#6FB0D6; --left-dim:#2E4A5C;
+    --right:#E89156; --right-dim:#6B4528;
+    --done:#5FBE9C; --hi:#FF7A6B; --med:#E8B45C; --lo:#6B7280;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;min-height:100vh;color:var(--ink);font-family:'Hanken Grotesk',sans-serif;font-size:15px;
+    background:radial-gradient(900px 700px at 22% 40%,rgba(111,176,214,.09),transparent 60%),
+               radial-gradient(900px 700px at 78% 40%,rgba(232,145,86,.10),transparent 60%),var(--bg);
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:99;opacity:.04;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  .wrap{max-width:1240px;margin:0 auto;padding:34px 30px 70px;}
+
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--muted);
+    display:flex;align-items:center;gap:12px;}
+  .kicker b{color:var(--ink-2);font-weight:500;}
+  .kicker .l{color:var(--left);} .kicker .r{color:var(--right);}
+  .kicker .sep{flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent);}
+  h1.title{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(26px,3.4vw,38px);letter-spacing:-.015em;margin:16px 0 4px;}
+  .lede{color:var(--ink-2);max-width:640px;margin:0 0 18px;font-size:15.5px;}
+
+  /* totals strip */
+  .totals{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+  .tot{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;}
+  .tot .l{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);}
+  .tot .v{font-family:var(--mono);font-weight:700;font-size:26px;margin-top:6px;}
+  .tot .v small{font-size:13px;color:var(--faint);font-weight:400;}
+  .splitbar{height:7px;border-radius:5px;margin-top:9px;background:var(--right);overflow:hidden;display:flex;}
+  .splitbar i{height:100%;background:var(--left);display:block;}
+  .splitlab{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:5px;}
+
+  .grid{display:grid;grid-template-columns:1.18fr .92fr;gap:16px;align-items:start;}
+  .card{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:16px;
+    box-shadow:0 40px 80px -55px #000;}
+  .mapcard{padding:6px;position:relative;}
+  .hemi-tag{position:absolute;top:14px;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;z-index:2;}
+  .hemi-tag.l{left:20px;color:var(--left);} .hemi-tag.r{right:20px;color:var(--right);text-align:right;}
+  .hemi-tag small{display:block;color:var(--faint);letter-spacing:.1em;margin-top:2px;}
+  svg{display:block;width:100%;height:auto;}
+  .node{cursor:pointer;}
+  .node .shape{transition:fill-opacity .2s,stroke-opacity .2s;}
+  .node:hover .shape{fill-opacity:1;}
+  .node.sel .ring-sel{opacity:1;}
+  .node.pruned{opacity:.42;}
+  .node text{font-family:var(--mono);font-size:9px;fill:var(--ink-2);}
+  .ring-sel{opacity:0;transition:opacity .2s;}
+
+  /* step panel */
+  .panel{padding:20px 22px;min-height:520px;}
+  .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:6px;}
+  .panel-head .who{display:flex;align-items:center;gap:10px;}
+  .panel-head .badge{width:11px;height:11px;border-radius:3px;flex:none;}
+  .panel-head h2{font-family:'Fraunces',serif;font-weight:500;font-size:21px;margin:0;}
+  .panel-head .sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px;}
+  .panel-head .est{font-family:var(--mono);font-size:12px;text-align:right;color:var(--ink-2);white-space:nowrap;}
+  .panel-head .est b{color:var(--ink);}
+  .prune{margin:12px 0 2px;padding:10px 13px;border:1px dashed var(--med);border-radius:9px;background:rgba(232,180,92,.07);
+    color:var(--med);font-size:13px;}
+  .prune b{color:var(--ink);}
+
+  .steps{margin-top:8px;display:flex;flex-direction:column;}
+  .step{display:flex;align-items:flex-start;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);}
+  .step:last-child{border-bottom:0;}
+  .box{width:19px;height:19px;border-radius:6px;border:1.6px solid var(--faint);flex:none;margin-top:1px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:.15s;}
+  .box:hover{border-color:var(--ink-2);}
+  .step.done .box{background:var(--done);border-color:var(--done);}
+  .box svg{width:12px;height:12px;opacity:0;}
+  .step.done .box svg{opacity:1;}
+  .step .body{flex:1;}
+  .step .t{font-size:14.5px;line-height:1.35;}
+  .step.done .t{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--faint);}
+  .step .meta{display:flex;gap:8px;margin-top:7px;flex-wrap:wrap;}
+  .pill{font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:20px;border:1px solid var(--line);color:var(--ink-2);}
+  .pill.hi{border-color:var(--hi);color:var(--hi);} .pill.med{border-color:var(--med);color:var(--med);} .pill.lo{border-color:var(--lo);color:var(--lo);}
+  .pill.t{color:var(--left);border-color:var(--left-dim);} .pill.c{color:var(--right);border-color:var(--right-dim);}
+
+  .addbtn{margin-top:16px;width:100%;border:1px dashed var(--line);background:transparent;color:var(--muted);
+    font-family:var(--mono);font-size:12px;letter-spacing:.04em;padding:12px;border-radius:10px;cursor:pointer;transition:.2s;}
+  .addbtn:hover{border-color:var(--ink-2);color:var(--ink-2);}
+  .addnote{margin-top:10px;font-size:12.5px;color:var(--faint);font-style:italic;display:none;}
+
+  .empty{color:var(--muted);text-align:center;padding:80px 20px;font-size:14px;}
+  footer{margin-top:20px;font-family:var(--mono);font-size:11px;color:var(--faint);line-height:1.7;}
+  footer b{color:var(--muted);}
+  #tip{position:fixed;pointer-events:none;z-index:50;background:#0A0B0D;border:1px solid var(--line);border-radius:9px;
+    padding:8px 11px;font-size:12px;opacity:0;transition:opacity .15s;box-shadow:0 18px 36px -18px #000;max-width:200px;}
+  #tip b{font-weight:700;}
+  @media(max-width:860px){.grid{grid-template-columns:1fr;}.totals{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Launch Engine · Action Map <span class="sep"></span> <b id="cName">—</b> · <span class="l">left = build</span> / <span class="r">right = market</span></div>
+  <h1 class="title">Everything that needs doing to launch</h1>
+  <p class="lede">The to-do list, clustered into build (material) and market (immaterial). Node size = how much work the area holds; the ring = progress. <b style="color:var(--ink-2)">Click an area to open its steps.</b></p>
+
+  <div class="totals">
+    <div class="tot"><div class="l">Steps done</div><div class="v"><span id="tDone">0</span><small>/<span id="tTotal">0</span></small></div></div>
+    <div class="tot"><div class="l">Hours remaining</div><div class="v" id="tHrs">0<small>h</small></div></div>
+    <div class="tot"><div class="l">Cost remaining</div><div class="v" id="tCost">$0</div></div>
+    <div class="tot"><div class="l">Build : Market (open hrs)</div>
+      <div class="splitbar"><i id="splitL"></i></div>
+      <div class="splitlab"><span id="splitLl">build</span><span id="splitRl">market</span></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card mapcard">
+      <div class="hemi-tag l">◧ Build<small>material</small></div>
+      <div class="hemi-tag r">Market ◨<small>immaterial</small></div>
+      <svg id="map" viewBox="0 0 900 540"></svg>
+    </div>
+
+    <div class="card panel" id="panel"><div class="empty">Select an area to see its steps →</div></div>
+  </div>
+
+  <footer>reads <b>data/hannah.concept.json</b> · steps carry <span style="color:var(--left)">time</span> + <span style="color:var(--right)">cost</span> estimates &amp; priority · check them off to update totals &amp; progress · pruned areas are dimmed</footer>
+</div>
+<div id="tip"></div>
+
+<script>
+// ---- action collection (mirrors + extends data/hannah.concept.json) ----
+const AREAS = [
+  {id:'product', t:'Product / MVP',       h:'left',  pruned:false, steps:[
+    {id:'p1',t:'Fix critical signup bug',hrs:3,cost:0,prio:'hi',done:false},
+    {id:'p2',t:'Cut scope: defer social feed to v2',hrs:1,cost:0,prio:'med',done:true},
+  ]},
+  {id:'qa', t:'QA / polish',              h:'left',  pruned:true, prune:"Stop polishing — the MVP is good enough to validate. One smoke test only.", steps:[
+    {id:'q1',t:'Smoke-test on 3 devices',hrs:2,cost:0,prio:'lo',done:false},
+  ]},
+  {id:'finance', t:'Pricing / economics',h:'left',  pruned:false, steps:[
+    {id:'f1',t:'Set founding price + Stripe payment link',hrs:3,cost:50,prio:'hi',done:false},
+    {id:'f2',t:'Sanity-check unit economics (LTV/CAC)',hrs:1,cost:0,prio:'med',done:false},
+  ]},
+  {id:'legal', t:'Legal / entity',        h:'left',  pruned:false, steps:[
+    {id:'l1',t:'Add privacy policy + terms to the app',hrs:2,cost:0,prio:'med',done:false},
+  ]},
+
+  {id:'idea', t:'Validation / position',  h:'right', pruned:false, steps:[
+    {id:'i1',t:'Write the deep-core positioning one-liner',hrs:1,cost:0,prio:'hi',done:false},
+    {id:'i2',t:'5 customer interviews with existing clients',hrs:3,cost:0,prio:'hi',done:false},
+  ]},
+  {id:'content', t:'Content & landing',   h:'right', pruned:false, steps:[
+    {id:'c1',t:'Build waitlist landing page',hrs:14,cost:50,prio:'hi',done:false},
+    {id:'c2',t:"Record '5-min deep-core reset' lead magnet",hrs:8,cost:0,prio:'hi',done:false},
+    {id:'c3',t:'Film 6 reels (postpartum / back / nervous-system)',hrs:12,cost:0,prio:'hi',done:false},
+    {id:'c4',t:'Write the 3 reel hook scripts',hrs:2,cost:0,prio:'med',done:false},
+  ]},
+  {id:'warm', t:'Warm outreach',          h:'right', pruned:false, steps:[
+    {id:'w1',t:'DM/text existing + lapsed clients',hrs:3,cost:0,prio:'hi',done:false},
+    {id:'w2',t:'Personal note to 5 niche contacts',hrs:1,cost:0,prio:'med',done:false},
+  ]},
+  {id:'partner', t:'Partnerships',        h:'right', pruned:false, steps:[
+    {id:'pa1',t:'Pitch 2 pelvic-floor PTs on referral',hrs:6,cost:0,prio:'hi',done:false},
+    {id:'pa2',t:'Draft partner one-pager',hrs:2,cost:0,prio:'med',done:false},
+  ]},
+  {id:'paid', t:'Paid + variant test',    h:'right', pruned:false, steps:[
+    {id:'pd1',t:'Set up Meta/IG ad account + pixel',hrs:2,cost:0,prio:'med',done:false},
+    {id:'pd2',t:'Launch 3-variant ad test (creative × audience)',hrs:2,cost:350,prio:'med',done:false},
+  ]},
+  {id:'appstore', t:'App Store / ASO',    h:'right', pruned:false, steps:[
+    {id:'a1',t:'Keyword-rich listing + screenshots',hrs:3,cost:0,prio:'med',done:false},
+  ]},
+];
+const CONCEPT_NAME = "Hannah's Deep-Core App";
+
+const SVGNS='http://www.w3.org/2000/svg';
+const $=s=>document.querySelector(s);
+const HCOL={left:'#6FB0D6',right:'#E89156'};
+const PRIO={hi:'hi',med:'med',lo:'lo'};
+let selected='content';
+
+// area aggregates
+const agg=a=>{const tot=a.steps.reduce((s,x)=>s+x.hrs,0);
+  const doneH=a.steps.filter(x=>x.done).reduce((s,x)=>s+x.hrs,0);
+  const openH=tot-doneH, openC=a.steps.filter(x=>!x.done).reduce((s,x)=>s+x.cost,0);
+  const doneN=a.steps.filter(x=>x.done).length;
+  return {tot,doneH,openH,openC,doneN,n:a.steps.length,frac:tot?doneH/tot:1};};
+
+// ---- layout (phyllotaxis lobes) ----
+const LOBES={left:{cx:280,cy:280},right:{cx:620,cy:280}};
+const pos={};
+['left','right'].forEach(h=>{
+  const items=AREAS.filter(a=>a.h===h); const n=items.length,maxR=170;
+  items.forEach((a,i)=>{
+    const ang=i*2.39996323+(h==='left'?0.6:2.0);
+    const rad=Math.sqrt((i+0.55)/n)*maxR;
+    pos[a.id]={x:LOBES[h].cx+Math.cos(ang)*rad*0.92*(h==='left'?-1:1),y:LOBES[h].cy+Math.sin(ang)*rad*1.02};
+  });
+});
+const maxTot=Math.max(...AREAS.map(a=>agg(a).tot));
+
+function lobeBg(){
+  let s=`<ellipse cx="280" cy="280" rx="208" ry="230" fill="url(#gL)"/><ellipse cx="620" cy="280" rx="208" ry="230" fill="url(#gR)"/>`;
+  const gyri=(cx,cy,col,dir)=>{let p='';for(let k=0;k<5;k++){const yy=cy-150+k*72;
+    p+=`<path d="M ${cx-150*dir} ${yy} q ${70*dir} -34 ${140*dir} 0 q ${70*dir} 34 ${140*dir} 0" fill="none" stroke="${col}" stroke-width="1.4" opacity=".09"/>`;}return p;};
+  return s+gyri(280,280,'#6FB0D6',1)+gyri(620,280,'#E89156',-1);
+}
+function connectors(){let s='';['left','right'].forEach(h=>{const items=AREAS.filter(a=>a.h===h);
+  items.forEach(a=>{const pa=pos[a.id];
+    items.filter(o=>o.id!==a.id).map(o=>({o,d:Math.hypot(pos[o.id].x-pa.x,pos[o.id].y-pa.y)}))
+      .sort((x,y)=>x.d-y.d).slice(0,2).forEach(({o})=>{const pb=pos[o.id];if(a.id<o.id){
+        s+= h==='left'
+          ? `<path d="M ${pa.x} ${pa.y} L ${(pa.x+pb.x)/2} ${pa.y} L ${(pa.x+pb.x)/2} ${pb.y} L ${pb.x} ${pb.y}" fill="none" stroke="#6FB0D6" stroke-width="1" opacity=".15"/>`
+          : `<path d="M ${pa.x} ${pa.y} Q ${(pa.x+pb.x)/2} ${(pa.y+pb.y)/2-26} ${pb.x} ${pb.y}" fill="none" stroke="#E89156" stroke-width="1" opacity=".15"/>`;}});});});return s;}
+function hex(r){let p='';for(let i=0;i<6;i++){const a=Math.PI/6+i*Math.PI/3;p+=`${(Math.cos(a)*r).toFixed(1)},${(Math.sin(a)*r).toFixed(1)} `;}return p.trim();}
+
+function buildMap(){
+  $('#map').innerHTML=`<defs>
+    <radialGradient id="gL" cx="50%" cy="46%" r="60%"><stop offset="0" stop-color="#6FB0D6" stop-opacity=".10"/><stop offset="1" stop-color="#6FB0D6" stop-opacity="0"/></radialGradient>
+    <radialGradient id="gR" cx="50%" cy="46%" r="60%"><stop offset="0" stop-color="#E89156" stop-opacity=".12"/><stop offset="1" stop-color="#E89156" stop-opacity="0"/></radialGradient>
+    </defs>${lobeBg()}${connectors()}
+    <line x1="450" y1="70" x2="450" y2="490" stroke="#3A3F49" stroke-width="1.5" stroke-dasharray="2 6"/>
+    <g id="nodes"></g>`;
+  const g=$('#nodes');
+  AREAS.forEach(a=>{
+    const p=pos[a.id], grp=document.createElementNS(SVGNS,'g');
+    grp.setAttribute('class','node'); grp.setAttribute('transform',`translate(${p.x},${p.y})`); grp.dataset.id=a.id;
+    // selection glow ring
+    const rsel=document.createElementNS(SVGNS,'circle'); rsel.setAttribute('class','ring-sel');
+    rsel.setAttribute('fill','none'); rsel.setAttribute('stroke',HCOL[a.h]); rsel.setAttribute('stroke-width','1.5'); grp.appendChild(rsel);
+    // progress track + arc
+    const track=document.createElementNS(SVGNS,'circle'); track.setAttribute('fill','none'); track.setAttribute('stroke','#2A2F37'); track.setAttribute('stroke-width','3'); grp.appendChild(track);
+    const arc=document.createElementNS(SVGNS,'circle'); arc.setAttribute('class','arc'); arc.setAttribute('fill','none'); arc.setAttribute('stroke','#5FBE9C'); arc.setAttribute('stroke-width','3'); arc.setAttribute('stroke-linecap','round'); grp.appendChild(arc);
+    // shape
+    const shape= a.h==='left'?document.createElementNS(SVGNS,'polygon'):document.createElementNS(SVGNS,'circle');
+    shape.setAttribute('class','shape'); shape.setAttribute('fill',HCOL[a.h]); shape.setAttribute('fill-opacity','.82');
+    shape.setAttribute('stroke', a.h==='left'?'#9CCBE6':'#F2B98A'); shape.setAttribute('stroke-opacity','.45'); shape.setAttribute('stroke-width','1'); grp.appendChild(shape);
+    const lbl=document.createElementNS(SVGNS,'text'); lbl.setAttribute('text-anchor','middle'); lbl.textContent=a.t; grp.appendChild(lbl);
+    g.appendChild(grp); a._el={grp,rsel,track,arc,shape,lbl};
+    grp.addEventListener('click',()=>{selected=a.id;renderMap();renderPanel();});
+    grp.addEventListener('mousemove',e=>{const ag=agg(a);tip.style.opacity='1';tip.style.left=Math.min(e.clientX+14,innerWidth-210)+'px';tip.style.top=(e.clientY+14)+'px';
+      tip.innerHTML=`<b>${a.t}</b><br>${ag.doneN}/${ag.n} done · ${ag.openH}h left${a.pruned?' · <span style="color:#E8B45C">pruned</span>':''}`;});
+    grp.addEventListener('mouseleave',()=>tip.style.opacity='0');
+  });
+}
+function renderMap(){
+  AREAS.forEach(a=>{
+    const {grp,rsel,track,arc,shape,lbl}=a._el, ag=agg(a);
+    const r=14+Math.sqrt(ag.tot/maxTot)*22;
+    const ringR=r+7, circ=2*Math.PI*ringR;
+    if(a.h==='left') shape.setAttribute('points',hex(r)); else shape.setAttribute('r',r);
+    [track,arc,rsel].forEach(c=>c.setAttribute('r', c===rsel?r+13:ringR));
+    arc.setAttribute('stroke-dasharray',`${(ag.frac*circ).toFixed(1)} ${(circ).toFixed(1)}`);
+    arc.setAttribute('transform','rotate(-90)');
+    lbl.setAttribute('y', r+15);
+    grp.setAttribute('class',`node ${a.pruned?'pruned':''} ${a.id===selected?'sel':''}`);
+  });
+}
+
+function renderPanel(){
+  const a=AREAS.find(x=>x.id===selected); if(!a){$('#panel').innerHTML='<div class="empty">Select an area →</div>';return;}
+  const ag=agg(a);
+  const rows=a.steps.map(s=>`
+    <div class="step ${s.done?'done':''}" data-id="${s.id}">
+      <div class="box" data-id="${s.id}"><svg viewBox="0 0 24 24" fill="none" stroke="#0E0F12" stroke-width="3.4"><path d="M5 13l4 4L19 7"/></svg></div>
+      <div class="body">
+        <div class="t">${s.t}</div>
+        <div class="meta">
+          <span class="pill ${s.prio}">${s.prio==='hi'?'high':s.prio==='med'?'medium':'low'}</span>
+          <span class="pill t">${s.hrs}h</span>
+          ${s.cost?`<span class="pill c">$${s.cost}</span>`:''}
+        </div>
+      </div>
+    </div>`).join('');
+  $('#panel').innerHTML=`
+    <div class="panel-head">
+      <div class="who"><span class="badge" style="background:${HCOL[a.h]}"></span>
+        <div><h2>${a.t}</h2><div class="sub">${a.h==='left'?'◧ build · material':'◨ market · immaterial'} · ${ag.doneN}/${ag.n} done</div></div></div>
+      <div class="est"><b>${ag.openH}h</b> left<br>${ag.openC?'$'+ag.openC:'$0'} cost</div>
+    </div>
+    ${a.pruned?`<div class="prune">✕ <b>Pruned.</b> ${a.prune}</div>`:''}
+    <div class="steps">${rows}</div>
+    <button class="addbtn" id="gen">＋ generate / refine steps with Claude</button>
+    <div class="addnote" id="note">↳ Claude step-generation wires in next — this is where the per-node chat will live.</div>`;
+  $('#panel').querySelectorAll('.box').forEach(b=>b.addEventListener('click',()=>{
+    const st=a.steps.find(x=>x.id===b.dataset.id); st.done=!st.done; renderPanel(); renderMap(); renderTotals();
+  }));
+  $('#gen').addEventListener('click',()=>$('#note').style.display='block');
+}
+
+function renderTotals(){
+  const all=AREAS.flatMap(a=>a.steps);
+  const done=all.filter(s=>s.done).length;
+  const openH=all.filter(s=>!s.done).reduce((s,x)=>s+x.hrs,0);
+  const openC=all.filter(s=>!s.done).reduce((s,x)=>s+x.cost,0);
+  $('#tDone').textContent=done; $('#tTotal').textContent=all.length;
+  $('#tHrs').innerHTML=openH+'<small>h</small>'; $('#tCost').textContent='$'+openC;
+  const lH=AREAS.filter(a=>a.h==='left').flatMap(a=>a.steps).filter(s=>!s.done).reduce((s,x)=>s+x.hrs,0);
+  const tot=Math.max(1,openH);
+  $('#splitL').style.width=(lH/tot*100)+'%';
+  $('#splitLl').textContent=`build ${lH}h`; $('#splitRl').textContent=`market ${openH-lH}h`;
+}
+
+const tip=$('#tip');
+$('#cName').textContent=CONCEPT_NAME;
+buildMap(); renderMap(); renderPanel(); renderTotals();
+</script>
+</body>
+</html>

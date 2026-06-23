@@ -52,9 +52,13 @@
   .ring-sel{opacity:0;transition:opacity .2s;}
   .node.sel .ring-sel{opacity:1;}
   .node.pruned{opacity:.4;}
+  #dotfield{position:absolute;inset:0;z-index:0;}
+  svg#map{position:relative;z-index:1;}
 
   /* side chat panel */
-  .side{width:392px;flex:none;height:100%;overflow:hidden;border-left:1px solid var(--line);background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  .side{width:392px;flex:none;height:100%;overflow:hidden;border-left:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(26,29,35,.82),rgba(22,24,29,.86));
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
     display:flex;flex-direction:column;}
   .side-head{padding:18px 20px;border-bottom:1px solid var(--line);}
   .side-head .crumb{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px;}
@@ -83,8 +87,9 @@
   #tip b{font-weight:700;}
 
   /* node info bubble (comfy-ui feel) */
-  .canvas{position:relative;width:1600px;height:1160px;}
-  .bubble{position:absolute;transform:translateX(-50%);width:266px;z-index:20;
+  .canvas{position:relative;width:1600px;height:1160px;
+    background:radial-gradient(460px 460px at 50% 48%, rgba(201,168,224,.12), transparent 70%);}
+  .bubble{position:absolute;transform:translateX(-50%);width:520px;z-index:20;
     background:linear-gradient(180deg,#1B1E24,#15171C);border:1px solid var(--bcol,#3A3F49);
     border-radius:11px;box-shadow:0 24px 55px -18px rgba(0,0,0,.85);padding:0 0 13px;}
   .bub-arrow{position:absolute;top:-7px;left:50%;transform:translateX(-50%) rotate(45deg);width:12px;height:12px;
@@ -98,7 +103,7 @@
   .bub-meta{font-family:var(--mono);font-size:10.5px;color:var(--muted);padding:0 13px 2px;}
   .bub-dlab{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);padding:9px 13px 4px;}
   .bub-desc{display:block;width:calc(100% - 26px);margin:0 13px;background:var(--bg);border:1px solid var(--line);border-radius:8px;
-    padding:8px 10px;color:var(--ink-2);font-family:inherit;font-size:13px;line-height:1.45;resize:vertical;min-height:66px;outline:none;}
+    padding:9px 11px;color:var(--ink-2);font-family:inherit;font-size:13.5px;line-height:1.5;resize:vertical;min-height:104px;outline:none;}
   .bub-desc:focus{border-color:var(--bcol,#888);color:var(--ink);}
   .bub-ai{margin:10px 13px 0;width:calc(100% - 26px);border:1px dashed var(--line);background:none;color:var(--muted);
     font-family:var(--mono);font-size:11px;padding:7px;border-radius:7px;cursor:pointer;}
@@ -173,6 +178,13 @@
   .sstep.done .st{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--faint);}
   .sstep .sh{font-family:var(--mono);font-size:10.5px;color:var(--faint);white-space:nowrap;}
   .sempty{color:var(--faint);font-size:12px;}
+  .sdh{cursor:pointer;user-select:none;}
+  .sdh .caret{display:inline-block;transition:transform .2s;color:var(--faint);margin-left:2px;}
+  .sday.open .sdh .caret{transform:rotate(90deg);}
+  .sday-detail{margin-top:11px;padding-top:11px;border-top:1px solid var(--line);}
+  .sdd-title{font-family:'Fraunces',serif;font-size:15.5px;margin-bottom:6px;color:var(--ink);line-height:1.25;}
+  .sdd-desc{font-size:12.5px;color:var(--ink-2);line-height:1.55;}
+  .sdd-loading{font-family:var(--mono);font-size:12px;color:var(--idea);}
 
   /* task list */
   .tasks{padding:24px 30px 80px;border-top:1px solid var(--line);background:rgba(0,0,0,.12);}
@@ -224,7 +236,7 @@
   <div class="shell">
     <div class="main" id="main">
       <div class="stage">
-        <div class="mapwrap"><div class="canvas" id="canvas"><svg id="map" viewBox="0 0 1600 1160" width="1600" height="1160"></svg><div id="bubble" class="bubble" style="display:none"></div></div></div>
+        <div class="mapwrap"><div class="canvas" id="canvas"><canvas id="dotfield" width="1600" height="1160"></canvas><svg id="map" viewBox="0 0 1600 1160" width="1600" height="1160"></svg><div id="bubble" class="bubble" style="display:none"></div></div></div>
       </div>
 
       <section class="tasks" id="tasks">
@@ -254,7 +266,8 @@ let AREAS = [];   // populated by loadConcept() or skeleton() on boot
 const defIntake=()=>({problem:'',why:'',build:'none',url:'',waitlist:0,paying:0,convos:0,days:14,chat:[]});
 const defBudget=()=>({timeHrs:60,money:500,hourlyRate:25,scenario:'balanced'});
 let INTAKE=defIntake(), BUDGET=defBudget();
-let SCHEDULE={days:[]};   // {days:[{refs:[{type:'step',id}], focus}]}, length 14
+let SCHEDULE={days:[]};   // {days:[{refs:[{type:'step',id}], focus, title, desc}]}, length 14
+let expandedDays=new Set();   // which schedule day cards are expanded
 
 const SVGNS='http://www.w3.org/2000/svg';
 const $=s=>document.querySelector(s);
@@ -262,6 +275,20 @@ const HCOL={left:'#6FB0D6',right:'#E89156'};
 const PCOL={hi:'#FF7A6B',med:'#E8B45C',lo:'#6B7280'};
 const CX=800,CY=560,R_AREA=300,STEP_DIST=170;
 const trunc=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s;
+function wrap(str,maxChars,maxLines){
+  const words=(str||'').trim().split(/\s+/).filter(Boolean);
+  if(!words.length) return [];
+  const lines=[]; let cur='';
+  for(const w of words){
+    const t=cur?cur+' '+w:w;
+    if(t.length<=maxChars){ cur=t; }
+    else { if(cur) lines.push(cur); cur=w; if(lines.length>=maxLines) break; }
+  }
+  if(lines.length<maxLines && cur) lines.push(cur);
+  if(lines.length>maxLines) lines.length=maxLines;
+  if(lines.join(' ').split(/\s+/).length < words.length) lines[lines.length-1]=trunc(lines[lines.length-1]+' …',maxChars+2);
+  return lines;
+}
 let sel={type:'global'};
 let gchat=[];          // global co-pilot chat thread
 let bubbleXY=null;     // last node-bubble position (to refresh after edits)
@@ -289,12 +316,20 @@ const agg=a=>{const tot=a.steps.reduce((s,x)=>s+x.hrs,0),dn=a.steps.filter(x=>x.
 function buildMap(){
   layout();
   let s=`<defs>
-    <radialGradient id="gi" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#C9A8E0" stop-opacity=".9"/><stop offset="1" stop-color="#7E5C96" stop-opacity=".7"/></radialGradient>
+    <radialGradient id="gi" cx="42%" cy="34%" r="70%"><stop offset="0" stop-color="#EAD9F6" stop-opacity=".97"/><stop offset="55%" stop-color="#A985C8" stop-opacity=".85"/><stop offset="1" stop-color="#5A3E76" stop-opacity=".8"/></radialGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6FB0D6"/><stop offset="0.5" stop-color="#C9A8E0"/><stop offset="1" stop-color="#E89156"/></linearGradient>
+    <radialGradient id="hub" cx="40%" cy="28%" r="82%"><stop offset="0" stop-color="#4E3970"/><stop offset="55%" stop-color="#2A1E40"/><stop offset="1" stop-color="#181024"/></radialGradient>
+    <filter id="glow" x="-120%" y="-120%" width="340%" height="340%"><feGaussianBlur stdDeviation="5"/></filter>
+    <filter id="bloom" x="-160%" y="-160%" width="420%" height="420%"><feGaussianBlur stdDeviation="11"/></filter>
   </defs>`;
-  // connectors center->area
+  // connectors center->area (soft glow under + bright core), and area->step
   AREAS.forEach(a=>{const c=HCOL[a.h];
-    s+=`<path d="M ${CX} ${CY} Q ${(CX+a._x)/2} ${(CY+a._y)/2} ${a._x} ${a._y}" fill="none" stroke="${c}" stroke-width="1.6" opacity=".3"/>`;
-    a.steps.forEach(st=>{ s+=`<line x1="${a._x}" y1="${a._y}" x2="${st._x}" y2="${st._y}" stroke="${c}" stroke-width="1" opacity=".22"/>`;});
+    const d=`M ${CX} ${CY} Q ${(CX+a._x)/2} ${(CY+a._y)/2} ${a._x} ${a._y}`;
+    s+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="6" opacity=".16" filter="url(#glow)"/>`;
+    s+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="1.6" opacity=".7"/>`;
+    a.steps.forEach(st=>{ const dl=`M ${a._x} ${a._y} L ${st._x} ${st._y}`;
+      s+=`<path d="${dl}" stroke="${c}" stroke-width="3.5" opacity=".11" filter="url(#glow)"/>`;
+      s+=`<path d="${dl}" stroke="${c}" stroke-width="1" opacity=".5"/>`;});
   });
   s+=`<g id="nodes"></g>`;
   $('#map').innerHTML=s;
@@ -359,11 +394,20 @@ function group(x,y,cls,onclick){const grp=mk('g',{class:cls,transform:`translate
 
 function visionNode(){
   const grp=group(CX,CY,'node vision'+(sel.type==='vision'?' sel':''),()=>focusNode('vision',null,CX,CY));
-  grp.appendChild(mk('circle',{class:'ring-sel',r:60,fill:'none',stroke:'#C9A8E0','stroke-width':1.5}));
-  grp.appendChild(mk('circle',{r:48,fill:'url(#gi)',stroke:'#D9C2EC','stroke-opacity':.5,'stroke-width':1,class:'shape','fill-opacity':.92}));
-  const t=mk('text',{'text-anchor':'middle','font-size':12,'font-weight':700,fill:'#1A1320',y:-3});t.textContent='THE VISION';grp.appendChild(t);
-  const t2=mk('text',{'text-anchor':'middle','font-size':9.5,fill:'#3A2C44',y:14});t2.textContent=trunc(NAME,18);grp.appendChild(t2);
-  const tag=mk('text',{'text-anchor':'middle','font-size':12.5,'font-weight':600,fill:'#C9A8E0',y:70});tag.textContent=trunc(VISION||'Set a vision in the Intake tab →',58);grp.appendChild(tag);
+  const R=96;
+  grp.appendChild(mk('circle',{class:'ring-sel',r:R+22,fill:'none',stroke:'#C9A8E0','stroke-width':1.5}));
+  grp.appendChild(mk('circle',{r:R+14,fill:'url(#gi)','fill-opacity':.42,filter:'url(#bloom)'}));            // bloom halo
+  grp.appendChild(mk('circle',{r:R+16,fill:'none',stroke:'#C9A8E0','stroke-opacity':.22,'stroke-width':2,filter:'url(#glow)'}));  // soft glow ring
+  grp.appendChild(mk('circle',{r:R,fill:'url(#hub)',stroke:'#E6D4F4','stroke-opacity':.7,'stroke-width':1.5,class:'shape'}));   // dark glass hub
+  grp.appendChild(mk('ellipse',{cx:-22,cy:-44,rx:44,ry:19,fill:'#ffffff','fill-opacity':.10}));             // specular highlight
+  const lab=mk('text',{'text-anchor':'middle','font-size':11,'font-weight':700,fill:'#C6A9E4','letter-spacing':'2.5',y:-54});lab.textContent='THE VISION';grp.appendChild(lab);
+  // product name (light, up to 2 lines)
+  const nl=wrap(NAME,18,2), nStart=-22-(nl.length-1)*10;
+  nl.forEach((ln,i)=>{const t=mk('text',{'text-anchor':'middle','font-size':17,'font-weight':700,fill:'#F4ECFB',y:nStart+i*20});t.textContent=ln;grp.appendChild(t);});
+  // vision text inside the hub (up to 4 lines)
+  const vy=nStart+nl.length*20+12;
+  const vl=VISION?wrap(VISION,24,4):['Set a vision in the','Intake tab →'];
+  vl.forEach((ln,i)=>{const t=mk('text',{'text-anchor':'middle','font-size':12,fill:'#D8CBEC',y:vy+i*16});t.textContent=ln;grp.appendChild(t);});
   grp.addEventListener('mousemove',e=>showTip(e,'<b>The Vision</b><br>'+esc(VISION||'(not set yet)')));grp.addEventListener('mouseleave',hideTip);
   return grp;
 }
@@ -372,12 +416,13 @@ function areaNode(a){
   const grp=group(a._x,a._y,'node area '+(a.pruned?'pruned ':'')+(sel.type==='area'&&sel.id===a.id?'sel':''),
     ()=>focusNode('area',a.id,a._x,a._y));
   grp.appendChild(mk('circle',{class:'ring-sel',r:r+11,fill:'none',stroke:c,'stroke-width':1.5}));
+  grp.appendChild(mk('circle',{r:r+11,fill:c,'fill-opacity':.30,filter:'url(#glow)',class:'halo'}));   // glow halo
   grp.appendChild(mk('circle',{r:r+6,fill:'none',stroke:'#2A2F37','stroke-width':3}));
   const circ=2*Math.PI*(r+6);
   grp.appendChild(mk('circle',{r:r+6,fill:'none',stroke:'#5FBE9C','stroke-width':3,'stroke-linecap':'round',transform:'rotate(-90)','stroke-dasharray':`${(ag.frac*circ).toFixed(1)} ${circ.toFixed(1)}`}));
   if(a.h==='left'){let p='';for(let i=0;i<6;i++){const an=Math.PI/6+i*Math.PI/3;p+=`${(Math.cos(an)*r).toFixed(1)},${(Math.sin(an)*r).toFixed(1)} `;}
-    grp.appendChild(mk('polygon',{points:p.trim(),fill:c,'fill-opacity':.85,stroke:'#9CCBE6','stroke-opacity':.45,class:'shape'}));}
-  else grp.appendChild(mk('circle',{r,fill:c,'fill-opacity':.85,stroke:'#F2B98A','stroke-opacity':.45,class:'shape'}));
+    grp.appendChild(mk('polygon',{points:p.trim(),fill:c,'fill-opacity':.92,stroke:'#C5E5F8','stroke-opacity':.7,'stroke-width':1.4,class:'shape'}));}
+  else grp.appendChild(mk('circle',{r,fill:c,'fill-opacity':.92,stroke:'#F8D2AC','stroke-opacity':.7,'stroke-width':1.4,class:'shape'}));
   const lbl=mk('text',{'text-anchor':'middle','font-size':13,'font-weight':600,fill:'#ECE9E3',y:r+19});lbl.textContent=a.t;grp.appendChild(lbl);
   const sub=mk('text',{'text-anchor':'middle','font-size':10.5,fill:'#7C766C',y:r+34});sub.textContent=a.sub||(a.h==='left'?'build':'market');grp.appendChild(sub);
   const tally=mk('text',{'text-anchor':'middle','font-size':9.5,fill:'#534E46','font-family':'var(--mono)',y:r+47});tally.textContent=`${ag.doneN}/${ag.n} done · ${ag.openH}h`;grp.appendChild(tally);
@@ -389,7 +434,8 @@ function stepNode(a,st){
   const grp=group(st._x,st._y,'node step '+(sel.type==='step'&&sel.id===st.id?'sel':''),
     e=>{e.stopPropagation();focusNode('step',st.id,st._x,st._y);});
   grp.appendChild(mk('circle',{class:'ring-sel',r:r+6,fill:'none',stroke:col,'stroke-width':1.4}));
-  grp.appendChild(mk('circle',{r,fill:col,'fill-opacity':st.done?.5:.92,stroke:'#0E0F12','stroke-width':1.5,class:'shape'}));
+  grp.appendChild(mk('circle',{r:r+5,fill:col,'fill-opacity':st.done?.2:.42,filter:'url(#glow)'}));   // glow halo
+  grp.appendChild(mk('circle',{r,fill:col,'fill-opacity':st.done?.5:.95,stroke:'#0B0D11','stroke-width':1.4,class:'shape'}));
   if(st.done){const ck=mk('path',{d:'M -3 0 L -1 2 L 3 -2',fill:'none',stroke:'#0E0F12','stroke-width':1.6});grp.appendChild(ck);}
   // outward title + estimate
   const dx=st._x-CX,dy=st._y-CY,L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L;
@@ -647,7 +693,12 @@ function renderScheduleBody(){
     totH+=dh; totC+=dc;
     const rows=steps.length?steps.map(s=>{const a=findStepArea(s.id);
       return `<div class="sstep ${s.done?'done':''}"><span class="box" data-sid="${s.id}"><svg viewBox="0 0 24 24" fill="none" stroke="#0E0F12" stroke-width="3.4"><path d="M5 13l4 4L19 7"/></svg></span><span class="dot" style="background:${HCOL[a?a.h:'left']}"></span><span class="st" data-fsid="${s.id}">${esc(s.t)}</span><span class="sh">${s.hrs}h${s.cost?' · $'+s.cost:''}</span></div>`;}).join(''):`<div class="sempty">—</div>`;
-    return `<div class="sday"><div class="sdh"><span>Day ${i+1}${day.focus?` · <span style="color:var(--muted);font-weight:400">${esc(day.focus)}</span>`:''}</span><span class="sdt">${dh?dh+'h':''}${dc?' · $'+dc:''}</span></div>${rows}</div>`;
+    const expanded=expandedDays.has(i);
+    return `<div class="sday ${expanded?'open':''}">
+      <div class="sdh" data-dayidx="${i}"><span>Day ${i+1}${day.focus?` · <span style="color:var(--muted);font-weight:400">${esc(day.focus)}</span>`:''}</span><span class="sdt">${dh?dh+'h':''}${dc?' · $'+dc:''} <span class="caret">▸</span></span></div>
+      ${rows}
+      ${expanded?`<div class="sday-detail">${day.desc?`<div class="sdd-title">${esc(day.title||day.focus||('Day '+(i+1)))}</div><div class="sdd-desc">${esc(day.desc)}</div>`:`<div class="sdd-loading">✨ generating day details…</div>`}</div>`:''}
+    </div>`;
   }).join('');
   $('#s_days').innerHTML=cards;
   const cap=BUDGET.timeHrs||60, over=totH>cap;
@@ -659,6 +710,22 @@ function renderScheduleBody(){
     const s=findStep(b.dataset.sid); if(s){ s.done=!s.done; touch(); buildMap(); renderTasks(); renderScheduleBody(); }}));
   $('#s_days').querySelectorAll('.st[data-fsid]').forEach(el=>el.addEventListener('click',()=>{
     sel={type:'step',id:el.dataset.fsid}; renderSide(); }));   // click a step → focus it in the co-pilot
+  $('#s_days').querySelectorAll('.sdh[data-dayidx]').forEach(el=>el.addEventListener('click',()=>{
+    const i=+el.dataset.dayidx;
+    if(expandedDays.has(i)) expandedDays.delete(i);
+    else { expandedDays.add(i); if(!SCHEDULE.days[i].desc) generateDayDetail(i); }
+    renderScheduleBody();
+  }));
+}
+async function generateDayDetail(i){
+  const day=SCHEDULE.days[i]; if(!day) return;
+  const steps=(day.refs||[]).map(r=>findStep(r.id)).filter(Boolean).map(s=>s.t);
+  const sys=`You write a short daily focus for a 2-week product launch. Given a day's tasks and the product, return ONLY a JSON object, no prose or fences: {"title":"<4-7 word punchy day title>","desc":"<2-3 sentences: what to accomplish today and why it matters>"}.`;
+  const prompt=`PRODUCT: ${NAME} — ${VISION}\nDAY ${i+1} TASKS: ${JSON.stringify(steps)}\nFULL PLAN:\n${mapState()}`;
+  const obj=await askClaude(sys,prompt);
+  day.title=(obj&&obj.title)||day.focus||`Day ${i+1}`;
+  day.desc=(obj&&obj.desc)||'(could not generate — try again)';
+  touch(); if(expandedDays.has(i)) renderScheduleBody();
 }
 async function claudeSchedule(){
   const open=buildOpenSteps().map(s=>({id:s.id,title:s.title,hrs:s.hrs,cost:s.cost,prio:s.prio,side:s.h==='left'?'build':'market',area:s.area}));
@@ -846,7 +913,40 @@ async function delConcept(){
   else location.search='';   // none left → boot creates a fresh starter
 }
 
+// reactbits-style Dot Field behind the map (bulge displacement + diagonal gradient + cursor glow)
+const DF={ dotRadius:1.5, dotSpacing:14, cursorRadius:500, bulgeStrength:67, glowRadius:160,
+  gradientFrom:'rgba(168,85,247,0.35)', gradientTo:'rgba(180,151,207,0.25)', glowColor:'rgba(170,120,230,0.16)' };
+function initDotField(){
+  const cv=document.getElementById('dotfield'); if(!cv) return;
+  const ctx=cv.getContext('2d'); const W=1600,H=1160,TAU=6.2832;
+  const R=DF.dotRadius, CR=DF.cursorRadius, CR2=CR*CR, BS=DF.bulgeStrength;
+  const dots=[]; for(let y=DF.dotSpacing/2;y<H;y+=DF.dotSpacing) for(let x=DF.dotSpacing/2;x<W;x+=DF.dotSpacing) dots.push([x,y]);
+  const grad=ctx.createLinearGradient(0,0,W,H); grad.addColorStop(0,DF.gradientFrom); grad.addColorStop(1,DF.gradientTo);
+  let mx=-1e5,my=-1e5,tx=mx,ty=my,running=false;
+  const mw=document.querySelector('.mapwrap');
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    if(tx>-9e4){ const g=ctx.createRadialGradient(mx,my,0,mx,my,DF.glowRadius);
+      g.addColorStop(0,DF.glowColor); g.addColorStop(1,'rgba(170,120,230,0)');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(mx,my,DF.glowRadius,0,TAU); ctx.fill(); }
+    ctx.fillStyle=grad; ctx.beginPath();
+    for(const d of dots){ let x=d[0],y=d[1];
+      const dx=x-mx, dy=y-my, d2=dx*dx+dy*dy;
+      if(d2<CR2){ const dist=Math.sqrt(d2)||0.001, f=1-dist/CR, push=BS*f*f, inv=1/dist; x+=dx*inv*push; y+=dy*inv*push; }
+      ctx.moveTo(x+R,y); ctx.arc(x,y,R,0,TAU);
+    }
+    ctx.fill();
+  }
+  function frame(){ mx+=(tx-mx)*0.2; my+=(ty-my)*0.2; draw();
+    if(tx>-9e4 || Math.abs(tx-mx)>0.5 || Math.abs(ty-my)>0.5) requestAnimationFrame(frame); else { draw(); running=false; } }
+  function start(){ if(!running){ running=true; requestAnimationFrame(frame); } }
+  mw.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect(); tx=e.clientX-r.left; ty=e.clientY-r.top; start();});
+  mw.addEventListener('pointerleave',()=>{tx=ty=-1e5; start();});
+  draw();   // initial static field
+}
+
 async function boot(){
+  initDotField();
   $('#auto').addEventListener('change',e=>auto=e.target.checked);
   $('#map').addEventListener('click',e=>{ if(!e.target.closest('.node')) clearFocus(); });
   $('#cpick').addEventListener('change',e=>switchConcept(e.target.value));

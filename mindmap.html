@@ -389,6 +389,11 @@ let gchat=[];          // global co-pilot chat thread
 let bubbleXY=null;     // last node-bubble position (to refresh after edits)
 let stage='mindmap';
 const STAGES=[['intake','1 · Intake'],['invest','2 · Invest & Simulate'],['mindmap','3 · Mind Map'],['schedule','4 · Schedule'],['checkin','5 · Check-ins'],['report','6 · Report']];
+// URL ↔ tab: slug derived from the tab label so it always matches (e.g. "2 · Invest & Simulate" → "invest-simulate")
+const stageSlug=id=>{const e=STAGES.find(s=>s[0]===id);return e?e[1].replace(/^[^·]*·\s*/,'').trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''):id;};
+const slugStage=sl=>{const e=STAGES.find(s=>stageSlug(s[0])===sl);return e?e[0]:null;};
+function setUrlTab(){ try{ const u=new URL(location.href); u.searchParams.set('tab',stageSlug(stage)); history.replaceState(null,'',u.href); }catch(e){} }
+function goStage(s){ stage=s; renderTabs(); applyStage(); setUrlTab(); }
 
 // ---------- layout (radiate from center) ----------
 function layout(){
@@ -677,7 +682,7 @@ async function globalSend(text,busy,display){
 // ---------- stage tabs ----------
 function renderTabs(){
   $('#tabs').innerHTML=STAGES.map(([id,l])=>`<button class="tab ${id===stage?'on':''}" data-s="${id}">${l}</button>`).join('');
-  $('#tabs').querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{stage=b.dataset.s;applyStage();renderTabs();}));
+  $('#tabs').querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>goStage(b.dataset.s)));
 }
 function applyStage(){
   const map=stage==='mindmap';
@@ -727,7 +732,7 @@ function renderIntake(stub){
   $('#ibuild').addEventListener('click',async()=>{
     const reply=await intakeSend("I'm ready — build the full launch plan from everything we've discussed. Emit many actions: areas with one-sentence descriptions, 2-4 concrete steps each (realistic hrs/cost/prio), and 3-5 fifteen-minute action items. Add/prune areas to fit my product.",
       "✨ I'm ready — build the plan", "✨ building your plan… (~20s)");
-    if(reply && (reply.actions||[]).length){ stage='mindmap'; renderTabs(); applyStage(); }
+    if(reply && (reply.actions||[]).length){ goStage('mindmap'); }
   });
   ta.focus(); grow();
 }
@@ -1277,7 +1282,7 @@ function rerenderAll(){
   const mw=document.querySelector('.mapwrap');
   requestAnimationFrame(()=>{ mw.scrollLeft=(1600-mw.clientWidth)/2; mw.scrollTop=(1160-mw.clientHeight)/2; });
 }
-function gotoConcept(id){ location.search='?c='+encodeURIComponent(id); }   // reloads the page on the chosen concept
+function gotoConcept(id){ const u=new URL(location.href); u.searchParams.set('c',id); location.assign(u.href); }   // reload on the chosen concept, keeping the current tab
 async function switchConcept(id){ if(id===CID) return; await save(true); gotoConcept(id); }
 async function newConcept(){
   const name=prompt('What are you building? (product name)'); if(!name) return;
@@ -1337,7 +1342,7 @@ async function boot(){
   $('#cpick').addEventListener('change',e=>switchConcept(e.target.value));
   $('#cnew').addEventListener('click',newConcept);
   $('#cdel').addEventListener('click',delConcept);
-  document.addEventListener('click',e=>{ if(e.target.closest('.mmlink')){ stage='mindmap'; renderTabs(); applyStage(); } });
+  document.addEventListener('click',e=>{ if(e.target.closest('.mmlink')){ goStage('mindmap'); } });
   $('#sidehandle').addEventListener('click',()=>setSide(document.body.classList.contains('side-closed')));
   if(window.innerWidth<=820) document.body.classList.add('side-closed');   // mobile: drawer starts hidden
   updateHandle();
@@ -1352,7 +1357,9 @@ async function boot(){
   if(!await loadConcept()){                    // ?c= pointed at a deleted/missing concept
     applyConcept(skeleton('Untitled product','')); await save(true);
   }
-  renderTabs(); applyStage();
+  const _ts=slugStage(new URLSearchParams(location.search).get('tab')||'');   // open the tab from the shared link
+  if(_ts) stage=_ts;
+  renderTabs(); applyStage(); setUrlTab();
   await loadConceptList();
   rerenderAll();
 }

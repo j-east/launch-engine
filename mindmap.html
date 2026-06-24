@@ -24,6 +24,13 @@
   .top,.tabs{flex:none;}
   .shell{flex:1;display:flex;min-height:0;}
   .main{flex:1;overflow:auto;min-width:0;}
+  /* dark themed scrollbars (app-wide; .mapwrap keeps its own below) */
+  *{scrollbar-width:thin;scrollbar-color:#2C313A transparent;}
+  *::-webkit-scrollbar{width:10px;height:10px;}
+  *::-webkit-scrollbar-track{background:transparent;}
+  *::-webkit-scrollbar-thumb{background:#2C313A;border-radius:8px;border:2px solid transparent;background-clip:padding-box;}
+  *::-webkit-scrollbar-thumb:hover{background:#3A414C;border:2px solid transparent;background-clip:padding-box;}
+  *::-webkit-scrollbar-corner{background:transparent;}
   body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:99;opacity:.04;mix-blend-mode:overlay;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
 
@@ -60,7 +67,7 @@
     background:linear-gradient(180deg,rgba(26,29,35,.82),rgba(22,24,29,.86));
     backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
     display:flex;flex-direction:column;transition:width .28s ease, transform .28s ease;}
-  .handle{position:fixed;top:50%;right:392px;transform:translateY(-50%);z-index:61;
+  .handle{position:fixed;top:50%;right:404px;transform:translateY(-50%);z-index:61;
     width:26px;height:66px;border:1px solid var(--line);border-right:none;border-radius:10px 0 0 10px;
     background:linear-gradient(180deg,var(--panel-2),var(--panel));color:var(--ink-2);cursor:pointer;
     font-size:17px;display:flex;align-items:center;justify-content:center;
@@ -115,6 +122,7 @@
   .bub-desc{display:block;width:calc(100% - 26px);margin:0 13px;background:var(--bg);border:1px solid var(--line);border-radius:8px;
     padding:9px 11px;color:var(--ink-2);font-family:inherit;font-size:13.5px;line-height:1.5;resize:vertical;min-height:104px;outline:none;}
   .bub-desc:focus{border-color:var(--bcol,#888);color:var(--ink);}
+  .bub-detail{margin:9px 13px 0;font-size:12px;color:var(--idea);line-height:1.5;}
   .bub-ai{margin:10px 13px 0;width:calc(100% - 26px);border:1px dashed var(--line);background:none;color:var(--muted);
     font-family:var(--mono);font-size:11px;padding:7px;border-radius:7px;cursor:pointer;}
   .bub-ai:hover{border-color:var(--bcol,#888);color:var(--ink-2);}
@@ -124,6 +132,14 @@
   .focuschip b{color:var(--ink);font-weight:600;}
   .focuschip button{margin-left:auto;background:none;border:none;color:var(--faint);cursor:pointer;font-family:var(--mono);font-size:11px;}
   .focuschip button:hover{color:var(--hi);}
+  .suggest{display:flex;flex-wrap:wrap;gap:7px;padding:10px 18px 0;}
+  .chip-sg{font-size:12px;border:1px solid var(--line);background:rgba(201,168,224,.06);color:var(--ink-2);
+    border-radius:16px;padding:6px 11px;cursor:pointer;transition:.15s;line-height:1.2;}
+  .chip-sg:hover{border-color:var(--idea);color:var(--ink);background:rgba(201,168,224,.13);}
+  .chip-q{display:block;width:100%;text-align:left;font-size:12.5px;border:1px solid var(--idea);
+    background:rgba(201,168,224,.10);color:var(--ink);border-radius:10px;padding:9px 12px;cursor:pointer;line-height:1.4;}
+  .chip-q:hover{background:rgba(201,168,224,.18);}
+  .chip-q.busy{color:var(--idea);cursor:default;border-style:dashed;background:none;}
 
   /* stage tabs */
   .tabs{display:flex;gap:2px;padding:0 26px;border-bottom:1px solid var(--line);background:var(--bg);overflow-x:auto;}
@@ -185,6 +201,8 @@
   .sstep .dot{width:8px;height:8px;border-radius:2px;flex:none;}
   .sstep .st{flex:1;font-size:13px;line-height:1.35;cursor:pointer;}
   .sstep .st:hover{color:var(--idea);}
+  .sstep .st.item{cursor:default;}
+  .sstep .st.item:hover{color:inherit;}
   .sstep.done .st{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--faint);}
   .sstep .sh{font-family:var(--mono);font-size:10.5px;color:var(--faint);white-space:nowrap;}
   .sempty{color:var(--faint);font-size:12px;}
@@ -195,6 +213,42 @@
   .sdd-title{font-family:'Fraunces',serif;font-size:15.5px;margin-bottom:6px;color:var(--ink);line-height:1.25;}
   .sdd-desc{font-size:12.5px;color:var(--ink-2);line-height:1.55;}
   .sdd-loading{font-family:var(--mono);font-size:12px;color:var(--idea);}
+
+  /* invest & simulate */
+  .tool.on{border-color:var(--idea);color:var(--ink);background:rgba(201,168,224,.12);}
+  .simwrap{margin-top:28px;border-top:1px solid var(--line);padding-top:22px;}
+  .simwrap h3{font-family:'Fraunces',serif;font-weight:500;font-size:20px;margin:0 0 4px;}
+  .simwrap .sub{color:var(--ink-2);font-size:13px;margin:0 0 14px;line-height:1.55;}
+  .simgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
+  .simcard{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px 17px;}
+  .simcard .ct{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:11px;}
+  .lev{margin-bottom:14px;}
+  .lev>label{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;color:var(--ink-2);margin-bottom:6px;}
+  .lev>label b,.lev>label span#lv_split{font-family:var(--mono);color:var(--ink);font-weight:700;font-size:12.5px;}
+  .lev input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:5px;background:var(--line);outline:none;cursor:pointer;padding:0;}
+  .lev input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--idea);border:3px solid var(--bg);cursor:pointer;}
+  .distrow{display:flex;align-items:flex-end;gap:2px;height:72px;margin:4px 0 8px;}
+  .distrow i{flex:1;background:linear-gradient(180deg,var(--idea),#54356F);border-radius:2px 2px 0 0;min-height:2px;}
+  .pcts{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--muted);}
+  .pcts b{color:var(--ink);}
+  .bigstat{display:flex;gap:16px;margin:13px 0 2px;}
+  .bigstat .s{flex:1;}
+  .bigstat .s .l{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+  .bigstat .s .v{font-family:var(--mono);font-weight:700;font-size:20px;margin-top:4px;color:var(--ink);}
+  .fnl{display:flex;flex-direction:column;gap:7px;font-size:12.5px;color:var(--ink-2);}
+  .fnl .fr{display:flex;justify-content:space-between;gap:10px;}
+  .fnl .fr b{color:var(--ink);}
+  .fnl .bar{height:7px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:3px;}
+  .matrix{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;margin-top:8px;}
+  .matrix th,.matrix td{padding:5px 7px;text-align:right;border-bottom:1px solid var(--line);color:var(--ink-2);white-space:nowrap;}
+  .matrix th{color:var(--faint);font-weight:500;text-transform:uppercase;letter-spacing:.07em;font-size:9.5px;}
+  .matrix td:first-child,.matrix th:first-child{text-align:left;}
+  .matrix tr.win td{color:var(--ink);background:rgba(201,168,224,.11);}
+  .matrix tr.win td:first-child{box-shadow:inset 3px 0 0 var(--idea);color:var(--idea);}
+  .simrec{margin-top:13px;background:rgba(95,190,156,.08);border:1px solid var(--done);border-radius:11px;padding:13px 15px;font-size:13px;line-height:1.6;color:var(--ink-2);}
+  .simrec b{color:var(--ink);font-weight:700;}
+  .simrec .hd{color:var(--done);}
+  @media(max-width:820px){ .simgrid{grid-template-columns:1fr;} }
 
   /* task list */
   .tasks{padding:24px 30px 80px;border-top:1px solid var(--line);background:rgba(0,0,0,.12);}
@@ -294,6 +348,22 @@ let INTAKE=defIntake(), BUDGET=defBudget();
 let SCHEDULE={days:[]};   // {days:[{refs:[{type:'step',id}], focus, title, desc}]}, length 14
 let expandedDays=new Set();   // which schedule day cards are expanded
 
+// ---------- Invest & Simulate: Monte Carlo priors + allocation ----------
+function defSimPriors(){ return {
+  goalRevenue:600, capAct:0.5, delegateRate:(BUDGET.hourlyRate||25), estimated:false,
+  price:{low:9,base:19,high:39},
+  baseActivation:{low:0.05,base:0.10,high:0.18},               // signup → paying fraction
+  channels:{
+    paid:{cpm:{low:8,base:14,high:24},ctr:{low:0.006,base:0.012,high:0.02},conv:{low:0.02,base:0.05,high:0.09},saturation:800},
+    organic:{yield:{low:0.6,base:2.5,high:7.0}},               // signups per hour of content work (upside-skewed)
+    network:{yield:{low:1.0,base:2.5,high:5.0}} },             // signups per hour of warm outreach
+  features:[] }; }                                              // [{id, uplift:{low,base,high}}] keyed by build-step id
+function defSimAlloc(){ return {price:19,paidSpend:Math.round((BUDGET.money||500)*0.5),
+  buildHrs:Math.round((BUDGET.timeHrs||60)*0.4),mktSplit:0.6,delegate:[],objective:'p50'}; }
+let SIM={priors:defSimPriors(),alloc:defSimAlloc()};
+SIM.alloc.price=SIM.priors.price.base;
+let SIM_MATRIX=null;   // last optimizer run (transient; not persisted)
+
 const SVGNS='http://www.w3.org/2000/svg';
 const $=s=>document.querySelector(s);
 const HCOL={left:'#6FB0D6',right:'#E89156'};
@@ -318,7 +388,7 @@ let sel={type:'global'};
 let gchat=[];          // global co-pilot chat thread
 let bubbleXY=null;     // last node-bubble position (to refresh after edits)
 let stage='mindmap';
-const STAGES=[['intake','1 · Intake'],['invest','2 · Invest'],['mindmap','3 · Mind Map'],['schedule','4 · Schedule'],['checkin','5 · Check-ins'],['report','6 · Report']];
+const STAGES=[['intake','1 · Intake'],['invest','2 · Invest & Simulate'],['mindmap','3 · Mind Map'],['schedule','4 · Schedule'],['checkin','5 · Check-ins'],['report','6 · Report']];
 
 // ---------- layout (radiate from center) ----------
 function layout(){
@@ -490,8 +560,29 @@ function renderSide(){
 function select(s){sel=s;buildMap();renderSide();}
 
 // focus a node: select it, redraw, pop the description bubble below it, tell the co-pilot
-function focusNode(type,id,x,y){ sel={type,id}; buildMap(); renderChat(); showBubble(x,y); }
+function focusNode(type,id,x,y){ sel={type,id}; buildMap(); renderChat(); showBubble(x,y); ensureNodeGen(); }
 function clearFocus(){ sel={type:'global'}; $('#bubble').style.display='none'; buildMap(); renderChat(); }
+
+// per-node generated detail + guiding question, cached and regenerated when the node/plan changes
+let genBusy=new Set();
+function focusedNode(){ return sel.type==='area'?AREAS.find(x=>x.id===sel.id):sel.type==='step'?findStep(sel.id):null; }
+function nodeSig(node){
+  const base=NAME+'|'+VISION+'|'+node.t+'|'+(node.desc||'');
+  return node.steps ? base+'|'+node.steps.map(s=>s.t).join(',') : base;   // area sig also tracks its step titles
+}
+async function ensureNodeGen(){
+  const node=focusedNode(); if(!node) return;
+  const sig=nodeSig(node);
+  if((node.gen&&node.gen.sig===sig) || genBusy.has(node.id)) return;   // fresh or already running
+  genBusy.add(node.id); renderChat();
+  const kind=node.steps?'area':'step';
+  const sys=`You are a launch co-pilot. For the given ${kind}, return ONLY a JSON object (no prose, no fences): {"detail":"<1-2 sentences naming the key DECISION to make here, or what 'done' looks like — concrete and real-world>","question":"<one sharp question whose answer unblocks the founder and points to a concrete next step>"}. Warm and momentum-building.`;
+  const prompt=`PRODUCT: ${NAME} — ${VISION}\n${kind.toUpperCase()}: "${node.t}" — ${node.desc||''}\nFULL PLAN:\n${mapState()}`;
+  const obj=await askClaude(sys,prompt);
+  node.gen={ detail:(obj&&obj.detail)||'', q:(obj&&obj.question)||'', sig };
+  genBusy.delete(node.id); touch();
+  if(focusedNode()===node){ renderChat(); if(bubbleXY) showBubble(bubbleXY.x,bubbleXY.y); }
+}
 function focusTitle(){ if(sel.type==='vision')return NAME; if(sel.type==='area'){const a=AREAS.find(x=>x.id===sel.id);return a?a.t:'';} const st=findStep(sel.id);return st?st.t:''; }
 function focusLine(){
   if(sel.type==='vision') return `\nFOCUSED NODE: the vision.`;
@@ -502,16 +593,17 @@ function focusLine(){
 function saveDesc(v){ if(sel.type==='vision')VISION=v; else if(sel.type==='area'){const a=AREAS.find(x=>x.id===sel.id);if(a)a.desc=v;} else {const st=findStep(sel.id);if(st)st.desc=v;} touch(); }
 function showBubble(x,y){
   const b=$('#bubble'); if(sel.type==='global'){b.style.display='none';return;}
-  let title,tag,desc,meta,col,off;
+  let title,tag,desc,meta,col,off,detail='';
   if(sel.type==='vision'){title=NAME;tag='the vision';col='#C9A8E0';desc=VISION;meta='';off=58;}
-  else if(sel.type==='area'){const a=AREAS.find(x=>x.id===sel.id);title=a.t;tag=(a.h==='left'?'build':'market')+' · area';col=HCOL[a.h];desc=a.desc||'';meta=`${a.steps.length} steps · ${(a.items||[]).length} 15-min items`;off=56;}
-  else {const st=findStep(sel.id),a=findStepArea(sel.id);title=st.t;tag=(a.h==='left'?'build':'market')+' · step';col=PCOL[st.prio];desc=st.desc||'';meta=`${st.hrs}h${st.cost?' · $'+st.cost:''} · ${st.prio}`;off=22;}
+  else if(sel.type==='area'){const a=AREAS.find(x=>x.id===sel.id);title=a.t;tag=(a.h==='left'?'build':'market')+' · area';col=HCOL[a.h];desc=a.desc||'';meta=`${a.steps.length} steps · ${(a.items||[]).length} 15-min items`;detail=(a.gen&&a.gen.detail)||'';off=56;}
+  else {const st=findStep(sel.id),a=findStepArea(sel.id);title=st.t;tag=(a.h==='left'?'build':'market')+' · step';col=PCOL[st.prio];desc=st.desc||'';meta=`${st.hrs}h${st.cost?' · $'+st.cost:''} · ${st.prio}`;detail=(st.gen&&st.gen.detail)||'';off=22;}
   b.style.setProperty('--bcol',col);
   b.innerHTML=`<div class="bub-arrow"></div>
     <div class="bub-head"><span class="bub-tag">${tag}</span><button class="bub-x" id="bx">✕</button></div>
     <div class="bub-title">${esc(title)}</div>${meta?`<div class="bub-meta">${meta}</div>`:''}
     <div class="bub-dlab">what this is</div>
     <textarea class="bub-desc" id="bdesc" placeholder="Describe what this is and why it matters…">${esc(desc)}</textarea>
+    ${detail?`<div class="bub-detail">→ ${esc(detail)}</div>`:''}
     <button class="bub-ai" id="bai">✨ ask co-pilot to describe this</button>`;
   b.style.left=x+'px'; b.style.top=(y+off)+'px'; b.style.display='block'; bubbleXY={x,y};
   $('#bx').addEventListener('click',clearFocus);
@@ -521,18 +613,50 @@ function showBubble(x,y){
 
 const linkifyMM=h=>h.replace(/Mind Map/g,'<a class="mmlink" data-mm>Mind Map</a>');
 const renderMsg=m=>m.role==='sys'?`<div class="msg sys">${esc(m.text)}</div>`:m.role==='u'?`<div class="msg u">${esc(m.text)}</div>`:`<div class="msg a"><div class="who">Claude</div>${linkifyMM(esc(m.text))}</div>`;
+// queued, node-specific prompts — the "next move" so a click never lands on a blank page
+function suggestions(){
+  if(sel.type==='vision') return [
+    {l:'Sharpen the vision',p:'Help me sharpen the vision into one clear, compelling sentence. Ask what you need, then propose two options.'},
+    {l:'Who is it for?',p:'Help me pin down exactly who the first customer is — be specific. Ask focused questions.'},
+    {l:'Most important next move',p:'Given everything you know, what is the single highest-leverage thing I should do next? Make it concrete.'},
+  ];
+  if(sel.type==='area'){ const a=AREAS.find(x=>x.id===sel.id); const build=a&&a.h==='left';
+    return [
+      {l:'Break into 15-min steps',p:`Break "${a?a.t:''}" into 4-6 concrete 15-minute action items and add them — each naming the exact tool, account, or file, and doable in ~15 minutes.`},
+      build
+        ? {l:'Tools & accounts I need',p:`For "${a?a.t:''}", list the exact tools, accounts and downloads I need to set up (e.g. Apple Developer Program, Xcode, a GitHub repo), each with its specific signup/download step, and add them as action items.`}
+        : {l:'Accounts to sign up for',p:`For "${a?a.t:''}", list the exact accounts/platforms to sign up for (e.g. Meta Business Suite, TikTok Ads Manager, an email tool), each with a concrete first step, and add them as action items.`},
+      build
+        ? {l:'Spec for Claude / a dev',p:`For "${a?a.t:''}", write the precise tasks/spec I'd hand to Claude or a developer to build first — concrete and buildable.`}
+        : {l:'Draft the first thing',p:`For "${a?a.t:''}", draft the very first concrete asset (the landing-page headline, the first DM, the first ad hook) so I can ship it today.`},
+    ];
+  }
+  const st=findStep(sel.id);
+  return [
+    {l:'First concrete action',p:`What's the very first concrete action for "${st?st.t:''}"? Name the exact tool, account, or click to start.`},
+    {l:'Break into 15-min steps',p:`Break the step "${st?st.t:''}" into 2-4 fifteen-minute sub-steps and add them as action items.`},
+    {l:'What does this need?',p:`What tools, accounts, or info do I need before I can do "${st?st.t:''}"? List them concretely.`},
+  ];
+}
 function renderChat(){
-  const foc=sel.type!=='global';
+  const foc=sel.type!=='global'; const sgs=foc?suggestions():[];
+  const fnode=foc?focusedNode():null, gq=fnode&&fnode.gen&&fnode.gen.q, gbusy=fnode&&genBusy.has(fnode.id);
   const msgs=gchat.length?gchat:[{role:'a',text:"I'm your launch co-pilot — always here. Tell me what you're building and I'll fill out the map, or hit ✨ for a full first draft. Click any node to focus it (its description pops up) and I'll know what you're working on."}];
   $('#side').innerHTML=`
     <div class="side-head"><div class="crumb"><span class="pip" style="background:var(--idea)"></span>Co-pilot</div><h2>Chat</h2></div>
     <div class="quick"><button class="tool" id="q_starter">✨ Generate starter plan</button><button class="tool" id="q_next">➤ What next?</button></div>
     <div class="chat" id="chat">${msgs.map(renderMsg).join('')}</div>
     ${foc?`<div class="focuschip">◎ focused: <b>${esc(focusTitle())}</b><button id="unfocus">clear</button></div>`:''}
+    ${foc?`<div class="suggest">
+      ${gbusy?`<span class="chip-q busy">✨ thinking through this node…</span>`:gq?`<button class="chip-q" id="chipq">💡 ${esc(gq)}</button>`:''}
+      ${sgs.map((s,i)=>`<button class="chip-sg" data-sg="${i}">${esc(s.l)}</button>`).join('')}
+    </div>`:''}
     <div class="composer"><input id="inp" placeholder="${foc?'Ask about “'+esc(focusTitle())+'”…':'Tell Claude about your product…'}"/><button id="send">Send</button></div>`;
   $('#q_starter').addEventListener('click',()=>globalSend("Build out a complete first-draft launch plan for this product. Ensure every non-pruned area has 2-4 concrete steps and 3-5 fifteen-minute action items, and give each area a one-sentence desc. Prune anything not worth doing in a 2-week launch. Be thorough — emit many actions.","✨ generating starter plan…","✨ Generate a starter plan"));
   $('#q_next').addEventListener('click',()=>globalSend("Looking at the whole map, what are the 3 highest-leverage things to do next? Reprioritise or add items if useful.","…thinking","What should I do next?"));
   if(foc)$('#unfocus').addEventListener('click',clearFocus);
+  $('#side').querySelectorAll('.chip-sg').forEach(b=>b.addEventListener('click',()=>{const s=sgs[+b.dataset.sg]; if(s) globalSend(s.p,null,s.l);}));
+  if(gq){const cq=$('#chipq'); if(cq) cq.addEventListener('click',()=>globalSend(`Help me work through this and turn it into concrete next steps: "${gq}"`,null,'💡 '+trunc(gq,70)));}
   const go=()=>{const v=$('#inp').value.trim();if(v){$('#inp').value='';globalSend(v);}};
   $('#send').addEventListener('click',go); $('#inp').addEventListener('keydown',e=>{if(e.key==='Enter')go();});
   const ch=$('#chat');ch.scrollTop=ch.scrollHeight;
@@ -638,22 +762,26 @@ function planTotals(){ let hrs=0,cost=0,lh=0,rh=0;
   return {hrs,cost,lh,rh}; }
 function renderInvest(stub){
   stub.innerHTML=`<div class="pane">
-    <h2>Invest — your two weeks &amp; budget</h2>
-    <p class="lead">Set what you can spend. We show whether the current plan fits; Claude can trim it to match.</p>
+    <h2>Invest &amp; Simulate — your two weeks &amp; budget</h2>
+    <p class="lead">Set what you can spend, then simulate the launch. A lightweight Monte Carlo runs your money &amp; hours through uncertain channel returns and feature payoffs — so pricing, ad spend, build-vs-market, and what to delegate become risk-adjusted decisions, not guesses.</p>
     <div class="scen">${Object.keys(SCEN).map(s=>`<button class="tool" data-scen="${s}">${s}</button>`).join('')}</div>
     <div class="field"><label>Time budget — hours over 2 weeks <b id="tval">${BUDGET.timeHrs}h</b></label><input type="range" id="tbud" min="10" max="140" step="2" value="${BUDGET.timeHrs}"></div>
     <div class="field"><label>Money budget <b id="mval">$${BUDGET.money}</b></label><input type="range" id="mbud" min="0" max="3000" step="50" value="${BUDGET.money}"></div>
     <div id="bmetrics" class="bmetrics"></div>
     <button class="genbtn" id="fitbtn">✂️ Fit the plan to my budget</button>
     <div class="istatus" id="b_status"></div>
+    <div class="simwrap" id="simwrap"></div>
   </div>`;
   const upd=()=>{ BUDGET.timeHrs=+$('#tbud').value; BUDGET.money=+$('#mbud').value;
-    $('#tval').textContent=BUDGET.timeHrs+'h'; $('#mval').textContent='$'+BUDGET.money; renderBudMetrics(); touch(); };
+    $('#tval').textContent=BUDGET.timeHrs+'h'; $('#mval').textContent='$'+BUDGET.money; renderBudMetrics();
+    SIM.alloc.buildHrs=Math.min(SIM.alloc.buildHrs,BUDGET.timeHrs);
+    SIM.alloc.paidSpend=Math.min(SIM.alloc.paidSpend,BUDGET.money);
+    renderSimulate(); touch(); };
   $('#tbud').addEventListener('input',upd); $('#mbud').addEventListener('input',upd);
   stub.querySelectorAll('[data-scen]').forEach(b=>b.addEventListener('click',()=>{const s=SCEN[b.dataset.scen];
     BUDGET.scenario=b.dataset.scen; $('#tbud').value=s.timeHrs; $('#mbud').value=s.money; upd();}));
   $('#fitbtn').addEventListener('click',fitToBudget);
-  renderBudMetrics();
+  renderBudMetrics(); renderSimulate();
 }
 function renderBudMetrics(){
   const t=planTotals(), hOver=t.hrs>BUDGET.timeHrs, cOver=t.cost>BUDGET.money;
@@ -674,31 +802,246 @@ Trim the plan to fit the budget: prune low-value areas (pruneArea), cut or shrin
   if(reply) renderBudMetrics();
 }
 
-// ---------- Stage 4: Schedule ----------
-function buildOpenSteps(){
-  const arr=[];
-  AREAS.forEach(a=>{ if(a.pruned) return; a.steps.forEach(s=>{ if(!s.done)
-    arr.push({id:s.id,title:s.t,hrs:s.hrs||0,cost:s.cost||0,prio:s.prio,h:a.h,area:a.t}); }); });
-  return arr;
+// ----- Monte Carlo simulation (pure client-side; Claude only supplies priors) -----
+function mulberry32(a){ return function(){ a|=0;a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function tri(p,u){ if(!p) return 0; let a=+p.low,c=+p.base,b=+p.high;
+  if(!isFinite(a))a=c; if(!isFinite(b))b=c; if(!(b>a)) return isFinite(c)?c:(a||0);
+  if(c<a)c=a; if(c>b)c=b; const fc=(c-a)/(b-a);
+  return u<fc ? a+Math.sqrt(u*(b-a)*(c-a)) : b-Math.sqrt((1-u)*(b-a)*(b-c)); }
+function allocSeed(A){ let h=2166136261;
+  [A.price,A.paidSpend,A.buildHrs,Math.round(A.mktSplit*100),(A.delegate||[]).length,A.funded?A.funded.length:0]
+    .forEach(n=>{ h^=(Math.round((+n||0)*1))|0; h=Math.imul(h,16777619); }); return h>>>0; }
+
+// current build features = open left-hemisphere steps, with any Claude-estimated activation uplift
+function simFeatures(){
+  const est={}; (SIM.priors.features||[]).forEach(f=>{ if(f&&f.id) est[f.id]=f.uplift; });
+  const out=[];
+  AREAS.forEach(a=>{ if(a.pruned||a.h!=='left') return;
+    a.steps.forEach(s=>{ if(s.done) return;
+      out.push({id:s.id,name:s.t,hrs:s.hrs||1,uplift:est[s.id]||{low:0,base:0.02,high:0.05}}); }); });
+  return out;
 }
+// turn the raw levers into a concrete allocation: which features get funded (self vs delegated), real hour/$ splits
+function resolveAlloc(raw){
+  const feats=simFeatures(), rate=SIM.priors.delegateRate||BUDGET.hourlyRate||25;
+  const T=BUDGET.timeHrs||60, M=BUDGET.money||500, del=new Set(raw.delegate||[]);
+  const buildHrs=Math.max(0,Math.min(T,raw.buildHrs)), mktHrs=Math.max(0,T-buildHrs);
+  const sorted=[...feats].sort((x,y)=>(y.uplift.base/Math.max(.25,y.hrs))-(x.uplift.base/Math.max(.25,x.hrs)));
+  const funded=[]; let selfH=0,delCost=0;
+  for(const f of sorted){
+    if(del.has(f.id)){ funded.push(f); delCost+=f.hrs*rate; }              // delegated: paid for, frees your hours
+    else if(selfH+f.hrs<=buildHrs+1e-9){ funded.push(f); selfH+=f.hrs; }   // self-built within your build hours
+  }
+  const paidSpend=Math.max(0,Math.min(raw.paidSpend, Math.max(0,M-delCost)));
+  return {price:raw.price, paidSpend, buildHrs, mktSplit:raw.mktSplit,
+    orgHrs:mktHrs*raw.mktSplit, netHrs:mktHrs*(1-raw.mktSplit),
+    funded, selfH, delCost, delegate:[...del], mktHrs, feats};
+}
+function runSim(A,N){
+  N=N||1400; const p=SIM.priors, rnd=mulberry32(allocSeed(A)), revs=new Float64Array(N);
+  let bp=0,bo=0,bn=0,sAct=0,sSign=0,sPay=0;
+  const pc=p.channels.paid, sat=pc.saturation||800, S=A.paidSpend, cap=p.capAct||0.5;
+  for(let i=0;i<N;i++){
+    let paid=0;
+    if(S>0){ const cpm=tri(pc.cpm,rnd()),ctr=tri(pc.ctr,rnd()),conv=tri(pc.conv,rnd());
+      const eff=cpm*(1+S/sat); paid=(S/eff*1000)*ctr*conv; }   // rising effective CPM = ad saturation
+    const org=A.orgHrs*tri(p.channels.organic.yield,rnd());
+    const net=A.netHrs*tri(p.channels.network.yield,rnd());
+    let act=tri(p.baseActivation,rnd());
+    for(const f of A.funded) act+=tri(f.uplift,rnd());          // features lift the rate ALL signups pass through
+    if(act>cap)act=cap; if(act<0)act=0;
+    const sign=paid+org+net, paying=sign*act;
+    revs[i]=paying*A.price; bp+=paid;bo+=org;bn+=net;sAct+=act;sSign+=sign;sPay+=paying;
+  }
+  revs.sort(); const q=f=>revs[Math.min(N-1,Math.max(0,Math.floor(f*N)))];
+  const goal=p.goalRevenue||0; let g=0; for(let i=0;i<N;i++) if(revs[i]>=goal)g++;
+  return {p10:q(.1),p50:q(.5),p90:q(.9),pGoal:g/N,
+    bd:{paid:bp/N,organic:bo/N,network:bn/N},act:sAct/N,sign:sSign/N,paying:sPay/N,revs};
+}
+
+function renderSimulate(){
+  const wrap=$('#simwrap'); if(!wrap) return;
+  const p=SIM.priors, A=SIM.alloc, T=BUDGET.timeHrs||60, M=BUDGET.money||500;
+  const priceMax=Math.max(50,Math.ceil(p.price.high*1.6));
+  wrap.innerHTML=`
+    <h3>Simulate the launch</h3>
+    <p class="sub">${p.estimated?'Numbers estimated by Claude for this product. ':'Using generic starting numbers. '}Drag the levers to see the spread of outcomes, or let the optimizer find the best split.
+      <button class="tool" id="sim_est" style="margin-left:4px">✨ ${p.estimated?'Re-estimate':'Estimate my numbers'}</button></p>
+    <div class="istatus" id="sim_status"></div>
+    <div class="simgrid">
+      <div class="simcard">
+        <div class="ct">levers</div>
+        <div class="lev"><label>Price <b id="lv_price">$${A.price}</b></label><input type="range" id="sl_price" min="1" max="${priceMax}" step="1" value="${A.price}"></div>
+        <div class="lev"><label>Paid ad spend <b id="lv_paid">$${Math.min(A.paidSpend,M)}</b></label><input type="range" id="sl_paid" min="0" max="${M}" step="10" value="${Math.min(A.paidSpend,M)}"></div>
+        <div class="lev"><label>Hours building features <b id="lv_build">${Math.min(A.buildHrs,T)}h</b></label><input type="range" id="sl_build" min="0" max="${T}" step="1" value="${Math.min(A.buildHrs,T)}"></div>
+        <div class="lev"><label>Marketing time split <span id="lv_split">organic ${Math.round(A.mktSplit*100)}% · outreach ${Math.round((1-A.mktSplit)*100)}%</span></label><input type="range" id="sl_split" min="0" max="100" step="5" value="${Math.round(A.mktSplit*100)}"></div>
+        <div class="lev"><label>Optimize for</label><div class="scen" style="margin:2px 0 0">
+          <button class="tool ${A.objective!=='pgoal'?'on':''}" data-obj="p50">median revenue</button>
+          <button class="tool ${A.objective==='pgoal'?'on':''}" data-obj="pgoal">P(hit goal)</button></div></div>
+        <button class="genbtn" id="sim_opt" style="margin-top:8px">🎲 Find best mix</button>
+      </div>
+      <div class="simcard" id="sim_results"></div>
+    </div>
+    <div id="sim_matrix"></div>`;
+  $('#sim_est').addEventListener('click',estimateNumbers);
+  wrap.querySelectorAll('[data-obj]').forEach(b=>b.addEventListener('click',()=>{ SIM.alloc.objective=b.dataset.obj; touch(); renderSimulate(); }));
+  $('#sl_price').addEventListener('input',e=>{A.price=+e.target.value;$('#lv_price').textContent='$'+A.price;simRender();touch();});
+  $('#sl_paid').addEventListener('input',e=>{A.paidSpend=+e.target.value;$('#lv_paid').textContent='$'+A.paidSpend;simRender();touch();});
+  $('#sl_build').addEventListener('input',e=>{A.buildHrs=+e.target.value;$('#lv_build').textContent=A.buildHrs+'h';simRender();touch();});
+  $('#sl_split').addEventListener('input',e=>{A.mktSplit=+e.target.value/100;$('#lv_split').textContent=`organic ${e.target.value}% · outreach ${100-(+e.target.value)}%`;simRender();touch();});
+  $('#sim_opt').addEventListener('click',optimizeMix);
+  simRender(); if(SIM_MATRIX) renderMatrix();
+}
+function simRender(){
+  const box=$('#sim_results'); if(!box) return;
+  const A=resolveAlloc(SIM.alloc), s=runSim(A,1400), goal=SIM.priors.goalRevenue||0;
+  const revs=s.revs, max=Math.max(revs[revs.length-1]||1,1), BINS=22, bins=new Array(BINS).fill(0);
+  for(const v of revs){ let k=Math.floor(v/max*BINS); if(k>=BINS)k=BINS-1; if(k<0)k=0; bins[k]++; }
+  const bmax=Math.max(...bins,1);
+  const bars=bins.map(b=>`<i style="height:${Math.max(2,Math.round(b/bmax*72))}px"></i>`).join('');
+  const fnl=[['Paid ads',s.bd.paid,HCOL.right],['Organic',s.bd.organic,'#E8B45C'],['Outreach',s.bd.network,'#C9A8E0']];
+  const fmax=Math.max(s.bd.paid,s.bd.organic,s.bd.network,1), nf=A.funded.length;
+  box.innerHTML=`
+    <div class="ct">outcome over ~1,400 simulated launches</div>
+    <div class="distrow">${bars}</div>
+    <div class="pcts"><span>$0</span><span>median <b>$${Math.round(s.p50).toLocaleString()}</b></span><span>$${Math.round(max).toLocaleString()}</span></div>
+    <div class="bigstat">
+      <div class="s"><div class="l">P10 – P90 range</div><div class="v" style="font-size:15px">$${Math.round(s.p10).toLocaleString()} – $${Math.round(s.p90).toLocaleString()}</div></div>
+      <div class="s"><div class="l">Clear $${goal.toLocaleString()} goal</div><div class="v" style="color:${s.pGoal>=.5?'var(--done)':'var(--med)'}">${Math.round(s.pGoal*100)}%</div></div>
+    </div>
+    <div class="ct" style="margin-top:15px">where the signups come from · average</div>
+    <div class="fnl">
+      ${fnl.map(([n,v,c])=>`<div><div class="fr"><span>${n}</span><span>${Math.round(v)} signups</span></div><div class="bar"><i style="display:block;height:100%;width:${Math.round(v/fmax*100)}%;background:${c}"></i></div></div>`).join('')}
+      <div class="fr" style="margin-top:5px"><span>${Math.round(s.sign)} signups × ${(s.act*100).toFixed(1)}% activation</span><span><b>${Math.round(s.paying)} paying</b></span></div>
+    </div>
+    <div class="ct" style="margin-top:15px">your build hours buy ${nf} feature${nf===1?'':'s'}${A.delCost?` · $${Math.round(A.delCost)} to delegate`:''}</div>
+    <div class="fnl">${nf?A.funded.slice(0,6).map(f=>`<div class="fr"><span>${esc(f.name)}${A.delegate.includes(f.id)?' · <i style="color:var(--idea);font-style:normal">delegated</i>':''}</span><span>+${(f.uplift.base*100).toFixed(1)}% act</span></div>`).join(''):'<div class="fr" style="color:var(--faint)">No features funded — add build steps, or build hours.</div>'}</div>`;
+}
+function optimizeMix(){
+  const st=$('#sim_status'); if(st){st.textContent='🎲 Simulating allocations…';st.className='istatus busy';}
+  setTimeout(()=>{                                  // yield so the busy state paints first
+    const evald=findBestMix(); SIM_MATRIX=evald.slice(0,10); const best=evald[0].A;
+    SIM.alloc.price=best.price; SIM.alloc.paidSpend=Math.round(best.paidSpend);
+    SIM.alloc.buildHrs=best.buildHrs; SIM.alloc.mktSplit=best.mktSplit; SIM.alloc.delegate=best.delegate.slice();
+    touch(); renderSimulate();
+    const s2=$('#sim_status'); if(s2){s2.textContent=`✓ Evaluated ${evald.length} allocations — applied the winner (highlighted below).`;s2.className='istatus ok';}
+  },30);
+}
+function findBestMix(){
+  const p=SIM.priors, obj=SIM.alloc.objective||'p50', T=BUDGET.timeHrs||60, M=BUDGET.money||500;
+  const feats=simFeatures(), rnd=mulberry32(0x1234abcd), evald=[];
+  const priceGrid=[p.price.low,(p.price.low+p.price.base)/2,p.price.base,(p.price.base+p.price.high)/2,p.price.high].map(x=>Math.max(1,Math.round(x)));
+  for(let i=0;i<440;i++){
+    const raw={ price:priceGrid[Math.floor(rnd()*priceGrid.length)],
+      buildHrs:Math.round(rnd()*T), mktSplit:rnd(), paidSpend:Math.round(rnd()*M),
+      delegate:feats.filter(()=>rnd()<0.25).map(f=>f.id) };
+    const A=resolveAlloc(raw), s=runSim(A,360);
+    evald.push({A,s, score: obj==='pgoal' ? s.pGoal*1e7+s.p50 : s.p50+s.pGoal*0.5});
+  }
+  evald.sort((x,y)=>y.score-x.score);
+  return evald;
+}
+function renderMatrix(){
+  const box=$('#sim_matrix'); if(!box||!SIM_MATRIX) return;
+  const rows=SIM_MATRIX.map((c,i)=>{ const A=c.A,s=c.s;
+    return `<tr class="${i===0?'win':''}"><td>${i===0?'★ best':'#'+(i+1)}</td>
+      <td>$${A.price}</td><td>$${Math.round(A.paidSpend)}</td><td>${A.buildHrs}h</td>
+      <td>${Math.round(A.orgHrs)}h</td><td>${Math.round(A.netHrs)}h</td><td>${A.delegate.length||'–'}</td>
+      <td>$${Math.round(s.p50).toLocaleString()}</td><td>${Math.round(s.pGoal*100)}%</td></tr>`; }).join('');
+  const best=SIM_MATRIX[0].A, bs=SIM_MATRIX[0].s, goal=SIM.priors.goalRevenue||0;
+  const names=best.funded.filter(f=>best.delegate.includes(f.id)).map(f=>f.name);
+  box.innerHTML=`
+    <div class="ct" style="margin-top:18px">the calculation matrix · top 10 of the allocations the simulator scored</div>
+    <div style="overflow-x:auto"><table class="matrix">
+      <tr><th>rank</th><th>price</th><th>paid</th><th>build</th><th>organic</th><th>outreach</th><th>deleg</th><th>median rev</th><th>P(goal)</th></tr>${rows}</table></div>
+    <div class="simrec"><span class="hd">▸ Best mix —</span> price <b>$${best.price}</b>, cap paid at <b>$${Math.round(best.paidSpend)}</b>, spend <b>${best.buildHrs}h</b> building (${best.funded.length} feature${best.funded.length===1?'':'s'}), then <b>${Math.round(best.orgHrs)}h</b> organic + <b>${Math.round(best.netHrs)}h</b> outreach${names.length?`, and delegate <b>${esc(names.join(', '))}</b>`:''}.
+      Median revenue <b>$${Math.round(bs.p50).toLocaleString()}</b> · <b>${Math.round(bs.pGoal*100)}%</b> chance of clearing your $${goal.toLocaleString()} goal.
+      <div style="margin-top:11px"><button class="tool" id="sim_toaction">➤ Turn this into action items</button></div></div>`;
+  $('#sim_toaction').addEventListener('click',()=>{ const a=SIM_MATRIX[0].A;
+    const dn=a.funded.filter(f=>a.delegate.includes(f.id)).map(f=>f.name);
+    globalSend(`From the launch optimizer, lock in these decisions and turn them into concrete 15-minute action items (use addItem in the right areas): set the product price to $${a.price}; create a paid ad campaign capped at $${Math.round(a.paidSpend)}; plan ~${a.buildHrs}h building features, ${Math.round(a.orgHrs)}h on organic/content, and ${Math.round(a.netHrs)}h on warm outreach${dn.length?'; delegate these builds to a freelancer or Claude: '+dn.join(', '):''}. Add the specific setup items — set the price in the product, set the ad-budget cap, draft the outreach list${dn.length?', write the brief for the delegated work':''}.`,'➤ turning the optimized mix into action items…','➤ Turn optimized mix into actions'); });
+}
+function rng(o,d){ if(!o||typeof o!=='object') return d;
+  const num=k=>{const v=+o[k];return isFinite(v)?v:null;};
+  let low=num('low'),base=num('base'),high=num('high');
+  if(low==null&&base==null&&high==null) return d;
+  const b=base!=null?base:(low!=null&&high!=null?(low+high)/2:(low!=null?low:high));
+  return {low:low!=null?low:b, base:b, high:high!=null?high:b}; }
+function mergeSimPriors(obj){
+  if(!obj||typeof obj!=='object') return false;
+  const p=SIM.priors;
+  try{
+    if(obj.price) p.price=rng(obj.price,p.price);
+    if(isFinite(+obj.goalRevenue)) p.goalRevenue=+obj.goalRevenue;
+    if(obj.baseActivation) p.baseActivation=rng(obj.baseActivation,p.baseActivation);
+    const c=obj.channels||{};
+    if(c.paid){ const q=c.paid; p.channels.paid.cpm=rng(q.cpm,p.channels.paid.cpm);
+      p.channels.paid.ctr=rng(q.ctr,p.channels.paid.ctr); p.channels.paid.conv=rng(q.conv,p.channels.paid.conv);
+      if(isFinite(+q.saturation)) p.channels.paid.saturation=+q.saturation; }
+    if(c.organic) p.channels.organic.yield=rng(c.organic.yield,p.channels.organic.yield);
+    if(c.network) p.channels.network.yield=rng(c.network.yield,p.channels.network.yield);
+    if(Array.isArray(obj.features)) p.features=obj.features.filter(f=>f&&f.id).map(f=>({id:f.id,uplift:rng(f.uplift,{low:0,base:0.02,high:0.05})}));
+    return true;
+  }catch(e){ return false; }
+}
+async function estimateNumbers(){
+  const st=$('#sim_status'); if(st){st.textContent='✨ Claude is estimating your numbers… (~20s)';st.className='istatus busy';}
+  const feats=simFeatures().map(f=>({id:f.id,title:f.name,hrs:f.hrs}));
+  const sys=`You estimate realistic launch-economics priors for a Monte Carlo simulation of a 2-week product launch. Return ONLY a JSON object — no prose, no fences. Every range is {"low":,"base":,"high":} (low=pessimistic, base=most likely, high=optimistic). Schema:
+{"price":{...} (product price, USD),
+ "goalRevenue": <realistic 2-week revenue goal, USD>,
+ "baseActivation":{...} (fraction of signups who become paying, e.g. 0.05),
+ "channels":{
+   "paid":{"cpm":{...} (USD per 1000 impressions),"ctr":{...} (click-through fraction),"conv":{...} (visit→signup fraction),"saturation":<USD spend where paid starts to saturate>},
+   "organic":{"yield":{...}} (new signups per hour of content work; make "high" notably above "base" for viral upside),
+   "network":{"yield":{...}} (new signups per hour of warm outreach)},
+ "features":[{"id":"<EXACT build-step id from the list>","uplift":{...}} (how much building it lifts the signup→paying fraction, e.g. 0.03)]}
+Ground every number in THIS product, audience and price point. Fractions as decimals. Only include features from the provided ids.`;
+  const prompt=`PRODUCT: ${NAME} — ${VISION}\nINTAKE: ${JSON.stringify(INTAKE)}\nBUILD FEATURES (use these exact ids):\n${JSON.stringify(feats)}\nCURRENT PLAN:\n${mapState()}`;
+  const obj=await askClaude(sys,prompt);
+  if(mergeSimPriors(obj)){ SIM.priors.estimated=true; SIM.alloc.price=Math.round(SIM.priors.price.base); touch(); renderSimulate();
+    const s2=$('#sim_status'); if(s2){s2.textContent='✓ Numbers estimated for this product — levers updated.';s2.className='istatus ok';} }
+  else { const s2=$('#sim_status'); if(s2){s2.textContent='⚠ Could not parse the estimate — try again.';s2.className='istatus err';} }
+}
+
+// ---------- Stage 4: Schedule ----------
+const SETUP_RE=/sign ?up|register|create an? (account|profile)|developer program|business (suite|manager)|ads? manager|apply|approval|\bdomain\b|\bdns\b|\border\b|provision|install|download|app store connect|merchant|stripe account/i;
+// unified schedulable pool: bigger 'step's + ~15-min 'item's, tagged build/market + setup-lead-time
+function buildOpenTasks(){
+  const out=[];
+  AREAS.forEach(a=>{ if(a.pruned) return; const side=a.h==='left'?'build':'market';
+    a.steps.forEach(s=>{ if(!s.done) out.push({id:s.id,kind:'step',title:s.t,hrs:s.hrs||0,cost:s.cost||0,prio:s.prio||'med',h:a.h,side,setup:SETUP_RE.test(s.t)}); });
+    (a.items||[]).forEach(it=>{ if(!it.done) out.push({id:it.id,kind:'item',title:it.t,hrs:0.25,cost:0,prio:'med',h:a.h,side,setup:SETUP_RE.test(it.t)}); });
+  });
+  return out;
+}
+function resolveRef(r){ const o=r.type==='item'?findItem(r.id):findStep(r.id); if(!o) return null;
+  const area=r.type==='item'?findItemArea(r.id):findStepArea(r.id);
+  return {o,item:r.type==='item',area,hrs:r.type==='item'?0.25:(o.hrs||0),cost:r.type==='item'?0:(o.cost||0)}; }
+
 function autoPackSchedule(){
   const rank={hi:0,med:1,lo:2};
-  const steps=buildOpenSteps().sort((a,b)=>(rank[a.prio]-rank[b.prio]));
-  const cap=Math.max(1.5,(BUDGET.timeHrs||60)/14);
-  const days=Array.from({length:14},()=>({refs:[],focus:''}));
-  let d=0;
-  for(const s of steps){
-    const dayHrs=days[d].refs.reduce((t,r)=>t+(findStep(r.id)?.hrs||0),0);
-    if(dayHrs>0 && dayHrs+s.hrs>cap*1.4 && d<13) d++;
-    days[Math.min(d,13)].refs.push({type:'step',id:s.id});
+  const score=t=>(t.setup?-4:0)+(rank[t.prio]??1);   // setup first, then priority
+  const tasks=buildOpenTasks();
+  const build=tasks.filter(t=>t.h==='left').sort((a,b)=>score(a)-score(b));
+  const market=tasks.filter(t=>t.h==='right').sort((a,b)=>score(a)-score(b));
+  const cap=Math.max(1,(BUDGET.timeHrs||60)/14);
+  const days=Array.from({length:14},()=>({refs:[],focus:'',hrs:0}));
+  let d=0,turn=0;
+  while(build.length||market.length){      // alternate sides so each day mixes build + market
+    const pool=(turn++%2===0)?(build.length?build:market):(market.length?market:build);
+    const t=pool.shift();
+    if(days[d].hrs>0 && days[d].hrs+t.hrs>cap*1.25 && d<13) d++;
+    days[d].refs.push({type:t.kind,id:t.id}); days[d].hrs+=t.hrs;
   }
-  SCHEDULE={days,generatedAt:Date.now()}; touch();
+  SCHEDULE={days:days.map(({refs,focus})=>({refs,focus})),generatedAt:Date.now()}; touch();
 }
 function renderSchedule(stub){
   if(!SCHEDULE.days || !SCHEDULE.days.length) autoPackSchedule();
   stub.innerHTML=`<div class="pane wide">
     <h2>Schedule — your 14 days</h2>
-    <p class="lead">Your open steps laid across two weeks, packed to your time budget. Check things off here or on the map — it stays in sync. Re-pack any time, or let Claude sequence it with dependencies in mind.</p>
+    <p class="lead">Steps and 15-minute items laid across two weeks — each day mixes build &amp; market so you can knock out marketing while you build, with setup-heavy things front-loaded and the daily time budget respected. Check things off here or on the map — it stays in sync.</p>
     <div class="scen"><button class="tool" id="s_auto">↻ Auto-pack</button><button class="tool" id="s_ai">✨ Let Claude sequence it</button></div>
     <div id="s_summary" class="bmetrics"></div>
     <div id="s_status" class="istatus"></div>
@@ -712,15 +1055,19 @@ function renderScheduleBody(){
   const days=SCHEDULE.days||[];
   let totH=0,totC=0,placed=0;
   const cards=days.map((day,i)=>{
-    const steps=(day.refs||[]).map(r=>findStep(r.id)).filter(Boolean);
-    placed+=steps.length;
-    const dh=steps.reduce((t,s)=>t+(s.hrs||0),0), dc=steps.reduce((t,s)=>t+(s.cost||0),0);
+    const ts=(day.refs||[]).map(resolveRef).filter(Boolean);
+    placed+=ts.length;
+    const dh=ts.reduce((s,t)=>s+t.hrs,0), dc=ts.reduce((s,t)=>s+t.cost,0);
     totH+=dh; totC+=dc;
-    const rows=steps.length?steps.map(s=>{const a=findStepArea(s.id);
-      return `<div class="sstep ${s.done?'done':''}"><span class="box" data-sid="${s.id}"><svg viewBox="0 0 24 24" fill="none" stroke="#0E0F12" stroke-width="3.4"><path d="M5 13l4 4L19 7"/></svg></span><span class="dot" style="background:${HCOL[a?a.h:'left']}"></span><span class="st" data-fsid="${s.id}">${esc(s.t)}</span><span class="sh">${s.hrs}h${s.cost?' · $'+s.cost:''}</span></div>`;}).join(''):`<div class="sempty">—</div>`;
+    const rows=ts.length?ts.map(t=>{const o=t.o, c=HCOL[t.area?t.area.h:'left'];
+      const timeLbl=t.item?'15m':`${o.hrs}h${o.cost?' · $'+o.cost:''}`;
+      const box=`<span class="box" data-${t.item?'iid':'sid'}="${o.id}"><svg viewBox="0 0 24 24" fill="none" stroke="#0E0F12" stroke-width="3.4"><path d="M5 13l4 4L19 7"/></svg></span>`;
+      const title=t.item?`<span class="st item">${esc(o.t)}</span>`:`<span class="st" data-fsid="${o.id}">${esc(o.t)}</span>`;
+      return `<div class="sstep ${o.done?'done':''}">${box}<span class="dot" style="background:${c}"></span>${title}<span class="sh">${timeLbl}</span></div>`;}).join(''):`<div class="sempty">—</div>`;
     const expanded=expandedDays.has(i);
+    const dhl=dh?(+dh.toFixed(2))+'h':'';
     return `<div class="sday ${expanded?'open':''}">
-      <div class="sdh" data-dayidx="${i}"><span>Day ${i+1}${day.focus?` · <span style="color:var(--muted);font-weight:400">${esc(day.focus)}</span>`:''}</span><span class="sdt">${dh?dh+'h':''}${dc?' · $'+dc:''} <span class="caret">▸</span></span></div>
+      <div class="sdh" data-dayidx="${i}"><span>Day ${i+1}${day.focus?` · <span style="color:var(--muted);font-weight:400">${esc(day.focus)}</span>`:''}</span><span class="sdt">${dhl}${dc?' · $'+dc:''} <span class="caret">▸</span></span></div>
       ${rows}
       ${expanded?`<div class="sday-detail">${day.desc?`<div class="sdd-title">${esc(day.title||day.focus||('Day '+(i+1)))}</div><div class="sdd-desc">${esc(day.desc)}</div>`:`<div class="sdd-loading">✨ generating day details…</div>`}</div>`:''}
     </div>`;
@@ -730,11 +1077,13 @@ function renderScheduleBody(){
   $('#s_summary').innerHTML=`
     <div class="bm ${over?'over':'okk'}"><div class="l">Scheduled hours</div><div class="v">${Math.round(totH)}<small> / ${cap}h</small></div></div>
     <div class="bm"><div class="l">Scheduled cost</div><div class="v">$${Math.round(totC)}</div></div>
-    <div class="bm"><div class="l">Open steps placed</div><div class="v">${placed}</div></div>`;
-  $('#s_days').querySelectorAll('.box').forEach(b=>b.addEventListener('click',()=>{
+    <div class="bm"><div class="l">Tasks placed</div><div class="v">${placed}</div></div>`;
+  $('#s_days').querySelectorAll('.box[data-sid]').forEach(b=>b.addEventListener('click',()=>{
     const s=findStep(b.dataset.sid); if(s){ s.done=!s.done; touch(); buildMap(); renderTasks(); renderScheduleBody(); }}));
+  $('#s_days').querySelectorAll('.box[data-iid]').forEach(b=>b.addEventListener('click',()=>{
+    const it=findItem(b.dataset.iid); if(it){ it.done=!it.done; touch(); renderTasks(); renderScheduleBody(); }}));
   $('#s_days').querySelectorAll('.st[data-fsid]').forEach(el=>el.addEventListener('click',()=>{
-    sel={type:'step',id:el.dataset.fsid}; renderSide(); }));   // click a step → focus it in the co-pilot
+    sel={type:'step',id:el.dataset.fsid}; renderSide(); ensureNodeGen(); }));   // click a step → focus it in the co-pilot
   $('#s_days').querySelectorAll('.sdh[data-dayidx]').forEach(el=>el.addEventListener('click',()=>{
     const i=+el.dataset.dayidx;
     if(expandedDays.has(i)) expandedDays.delete(i);
@@ -744,33 +1093,36 @@ function renderScheduleBody(){
 }
 async function generateDayDetail(i){
   const day=SCHEDULE.days[i]; if(!day) return;
-  const steps=(day.refs||[]).map(r=>findStep(r.id)).filter(Boolean).map(s=>s.t);
+  const titles=(day.refs||[]).map(resolveRef).filter(Boolean).map(t=>t.o.t);
   const sys=`You write a short daily focus for a 2-week product launch. Given a day's tasks and the product, return ONLY a JSON object, no prose or fences: {"title":"<4-7 word punchy day title>","desc":"<2-3 sentences: what to accomplish today and why it matters>"}.`;
-  const prompt=`PRODUCT: ${NAME} — ${VISION}\nDAY ${i+1} TASKS: ${JSON.stringify(steps)}\nFULL PLAN:\n${mapState()}`;
+  const prompt=`PRODUCT: ${NAME} — ${VISION}\nDAY ${i+1} TASKS: ${JSON.stringify(titles)}\nFULL PLAN:\n${mapState()}`;
   const obj=await askClaude(sys,prompt);
   day.title=(obj&&obj.title)||day.focus||`Day ${i+1}`;
   day.desc=(obj&&obj.desc)||'(could not generate — try again)';
   touch(); if(expandedDays.has(i)) renderScheduleBody();
 }
 async function claudeSchedule(){
-  const open=buildOpenSteps().map(s=>({id:s.id,title:s.title,hrs:s.hrs,cost:s.cost,prio:s.prio,side:s.h==='left'?'build':'market',area:s.area}));
+  const tasks=buildOpenTasks().map(t=>({id:t.id,kind:t.kind,title:t.title,hrs:t.hrs,side:t.side,prio:t.prio,setup:t.setup}));
   const st=$('#s_status');
-  if(!open.length){ st.textContent='No open steps to schedule yet — build the plan first.'; st.className='istatus'; return; }
+  if(!tasks.length){ st.textContent='Nothing open to schedule yet — build the plan first.'; st.className='istatus'; return; }
   const cap=Math.max(1,(BUDGET.timeHrs||60)/14).toFixed(1);
-  const sys=`You schedule a 2-week product launch. Given OPEN steps and a daily time budget, lay every step across 14 days. Front-load high priority and respect dependencies (build the landing page before running ads; validate before scaling; set up payments before selling). Aim for ~${cap}h/day but it's fine to vary. Return ONLY a JSON object, no prose, no fences:
-{"days":[{"day":1,"focus":"<3-5 word theme>","stepIds":["id",...]}, ... up to 14]}
-Place every open step on some day. Use the EXACT ids provided.`;
-  const prompt=`BUDGET: ${BUDGET.timeHrs}h and $${BUDGET.money} over 14 days.\nOPEN STEPS:\n${JSON.stringify(open)}`;
-  st.textContent='✨ Claude is sequencing your 14 days… (~20s)'; st.className='istatus busy';
+  const sys=`You schedule a 2-week launch as a DAILY agenda the founder can actually do. You get a pool of TASKS — kind "step" (bigger) and kind "item" (~15 minutes). Lay them across 14 days. Rules:
+- MIX build and market every day. The founder has limited focus for building but can knock out marketing items in parallel — pair heavy build work with light market items and vice-versa, so no day is all one side.
+- FRONT-LOAD anything with real-world setup lead time (setup:true — accounts, approvals, sign-ups, downloads, domains) into the first 1-3 days, because they take time to come through.
+- Respect the budget: keep each day's summed hrs near ~${cap}h (items are 0.25h each; it's great to pack MANY 15-minute items into a day).
+- Make every day achievable and focused — assign work that can be done well, don't overload.
+Return ONLY JSON (no prose/fences): {"days":[{"day":1,"focus":"<3-5 word theme>","taskIds":["id",...]}, ... up to 14]}. Use EXACT ids; place every task on some day.`;
+  const prompt=`BUDGET: ${BUDGET.timeHrs}h and $${BUDGET.money} over 14 days (~${cap}h/day).\nTASKS:\n${JSON.stringify(tasks)}`;
+  st.textContent='✨ Claude is building your 14-day agenda… (~20s)'; st.className='istatus busy';
   const obj=await askClaude(sys,prompt);
   if(obj && Array.isArray(obj.days)){
-    const valid=new Set(open.map(s=>s.id)), seen=new Set();
+    const kindOf={}; tasks.forEach(t=>kindOf[t.id]=t.kind); const seen=new Set();
     const days=Array.from({length:14},()=>({refs:[],focus:''}));
     obj.days.forEach(d=>{ const i=Math.max(1,Math.min(14,+d.day||1))-1; if(d.focus)days[i].focus=d.focus;
-      (d.stepIds||[]).forEach(id=>{ if(valid.has(id)&&!seen.has(id)){ seen.add(id); days[i].refs.push({type:'step',id}); } }); });
-    open.forEach(s=>{ if(!seen.has(s.id)) days[13].refs.push({type:'step',id:s.id}); });  // catch any Claude missed
+      (d.taskIds||[]).forEach(id=>{ if(kindOf[id]&&!seen.has(id)){ seen.add(id); days[i].refs.push({type:kindOf[id],id}); } }); });
+    tasks.forEach(t=>{ if(!seen.has(t.id)) days[13].refs.push({type:t.kind,id:t.id}); });   // catch any missed
     SCHEDULE={days,generatedAt:Date.now()}; touch(); renderScheduleBody();
-    st.textContent='✓ Sequenced by Claude — dependency-aware.'; st.className='istatus ok';
+    st.textContent='✓ Agenda built — build + market mixed, setup front-loaded.'; st.className='istatus ok';
   } else { st.textContent='⚠ Could not parse the schedule — try again.'; st.className='istatus err'; }
 }
 
@@ -799,7 +1151,9 @@ ACTION ITEMS (the 15-minute checklist under each area — small, complete, momen
 - toggleItem {itemId,done}
 - deleteItem {itemId}
 
-Rules: only emit actions the founder asked for or that clearly help; prefer 1-4 focused actions; realistic hour/dollar estimates. Action items MUST be doable in ~15 minutes, concrete, and phrased to build momentum (start with a verb). When the founder completes an item, consider adding the next 1-3 items so they never run out of next steps. Always include a short message describing what you did or answering them.`;
+Rules: only emit actions the founder asked for or that clearly help; prefer 1-4 focused actions; realistic hour/dollar estimates. Action items MUST be doable in ~15 minutes, concrete, and phrased to build momentum (start with a verb). When the founder completes an item, consider adding the next 1-3 items so they never run out of next steps. Always include a short message describing what you did or answering them.
+
+BE CONCRETE & REAL-WORLD: name actual tools, accounts, and downloads — e.g. "Sign up for the Apple Developer Program ($99/yr) at developer.apple.com", "Download Xcode from the Mac App Store", "Create a Meta Business Suite account", "Make a GitHub repo". Frame development work as specific tasks to hand to Claude or a developer (a clear spec, not vague intentions). TONE: warm, energizing, momentum-building — your job is to move the founder out of the fog and into settled decisions and the next obvious 15-minute action. Reduce overwhelm; make the next step feel easy and inevitable.`;
 
 const INTAKE_SYSTEM = SYSTEM + `
 
@@ -874,7 +1228,7 @@ function hideTip(){tip.style.opacity='0';}
 // ---------- persistence + concept switching (Postgres via /api/concept) ----------
 let CID='hannah';
 let saveT=null;
-function serialize(){ return {name:NAME, vision:VISION, areas:AREAS, intake:INTAKE, budget:BUDGET, schedule:SCHEDULE}; }
+function serialize(){ return {name:NAME, vision:VISION, areas:AREAS, intake:INTAKE, budget:BUDGET, schedule:SCHEDULE, sim:{priors:SIM.priors,alloc:SIM.alloc}}; }
 function save(now){
   clearTimeout(saveT);
   const doit=async()=>{ try{ await fetch('/api/concept',{method:'PUT',headers:{'Content-Type':'application/json'},
@@ -886,6 +1240,8 @@ function touch(){ save(false); }
 function applyConcept(d){ NAME=d.name||'Untitled'; VISION=d.vision||''; AREAS=Array.isArray(d.areas)?d.areas:[];
   INTAKE=Object.assign(defIntake(),d.intake||{}); BUDGET=Object.assign(defBudget(),d.budget||{});
   SCHEDULE=(d.schedule&&Array.isArray(d.schedule.days))?d.schedule:{days:[]};
+  SIM=(d.sim&&d.sim.priors)?{priors:Object.assign(defSimPriors(),d.sim.priors),alloc:Object.assign(defSimAlloc(),d.sim.alloc||{})}:{priors:defSimPriors(),alloc:defSimAlloc()};
+  if(!SIM.alloc.price)SIM.alloc.price=SIM.priors.price.base; SIM_MATRIX=null;
   gchat=[]; sel={type:'global'}; bubbleXY=null; }
 async function loadConcept(){
   try{ const r=await fetch('/api/concept?id='+CID);
@@ -943,7 +1299,7 @@ function updateHandle(){ const h=$('#sidehandle'); if(h) h.textContent=document.
 function setSide(open){ document.body.classList.toggle('side-closed', !open); updateHandle(); }
 
 // reactbits-style Dot Field behind the map (bulge displacement + diagonal gradient + cursor glow)
-const DF={ dotRadius:1.5, dotSpacing:14, cursorRadius:500, bulgeStrength:67, glowRadius:160,
+const DF={ dotRadius:1.5, dotSpacing:14, cursorRadius:500, bulgeStrength:7, glowRadius:160,
   gradientFrom:'rgba(168,85,247,0.35)', gradientTo:'rgba(180,151,207,0.25)', glowColor:'rgba(170,120,230,0.16)' };
 function initDotField(){
   const cv=document.getElementById('dotfield'); if(!cv) return;

@@ -361,7 +361,7 @@
     <div class="box">
       <div class="mh"><h3>Export to your AI</h3><button class="x" id="xclose">✕</button></div>
       <textarea id="xtext" readonly spellcheck="false"></textarea>
-      <div class="mf"><span class="hint">Paste this into ChatGPT, Claude, or any AI for full project context.</span><button class="cnew" id="xclose2">Close</button><button class="genbtn" id="xcopy">Copy</button></div>
+      <div class="mf"><span class="hint">A ready-to-run prompt — paste it into ChatGPT, Claude, or any AI and it'll start helping you execute.</span><button class="cnew" id="xclose2">Close</button><button class="genbtn" id="xcopy">Copy</button></div>
     </div>
   </div>
 
@@ -1423,10 +1423,11 @@ async function delConcept(){
 
 // ---------- export to AI: a copyable plain-text digest of the whole concept ----------
 function exportText(){
-  const L=[];
-  L.push(`# ${NAME} — 2-week launch plan`);
-  if(VISION) L.push(`Vision: ${VISION}`);
-  L.push('');
+  // ----- the plan digest (the "PROJECT STATE" block) -----
+  const D=[];
+  D.push(`# ${NAME} — 2-week launch plan`);
+  if(VISION) D.push(`Vision: ${VISION}`);
+  D.push('');
   const I=INTAKE, ctx=[];
   if(I.problem) ctx.push(`- Problem: ${I.problem}`);
   if(I.why) ctx.push(`- Why me / why now: ${I.why}`);
@@ -1438,30 +1439,69 @@ function exportText(){
   if(+I.paying) ev.push(`${I.paying} paying`);
   if(+I.convos) ev.push(`${I.convos} customer convos`);
   if(ev.length) ctx.push(`- Current state: ${ev.join(', ')}`);
-  if(ctx.length){ L.push('## Context'); L.push(...ctx); L.push(''); }
-  L.push('## Budget'); L.push(`- ${BUDGET.timeHrs}h over 2 weeks · $${BUDGET.money} cash · ~$${BUDGET.hourlyRate}/h time value`); L.push('');
+  if(ctx.length){ D.push('## Context'); D.push(...ctx); D.push(''); }
+  D.push('## Budget'); D.push(`- ${BUDGET.timeHrs}h over 2 weeks · $${BUDGET.money} cash · ~$${BUDGET.hourlyRate}/h time value`); D.push('');
   const side=(h,label)=>{ const arr=AREAS.filter(a=>a.h===h); if(!arr.length) return;
-    L.push(`## ${label}`);
+    D.push(`## ${label}`);
     arr.forEach(a=>{ const ag=agg(a);
-      L.push(`### ${a.t}${a.pruned?' (pruned)':''} — ${ag.doneN}/${ag.n} steps done, ${ag.openH}h left`);
-      if(a.desc) L.push(a.desc);
-      a.steps.forEach(s=>L.push(`- [${s.done?'x':' '}] ${s.t} (${s.hrs}h${s.cost?', $'+s.cost:''}, ${s.prio})${s.desc?' — '+s.desc:''}`));
+      D.push(`### ${a.t}${a.pruned?' (pruned)':''} — ${ag.doneN}/${ag.n} steps done, ${ag.openH}h left`);
+      if(a.desc) D.push(a.desc);
+      a.steps.forEach(s=>D.push(`- [${s.done?'x':' '}] ${s.t} (${s.hrs}h${s.cost?', $'+s.cost:''}, ${s.prio})${s.desc?' — '+s.desc:''}`));
       const its=(a.items||[]).filter(Boolean);
-      if(its.length){ L.push('  15-min items:'); its.forEach(it=>L.push(`  - [${it.done?'x':' '}] ${it.t}${it.notes?' — '+it.notes:''}`)); }
-      L.push(''); });
+      if(its.length){ D.push('  15-min items:'); its.forEach(it=>D.push(`  - [${it.done?'x':' '}] ${it.t}${it.notes?' — '+it.notes:''}`)); }
+      D.push(''); });
   };
   side('left','BUILD — material (left brain)');
   side('right','MARKET — immaterial (right brain)');
   const days=(SCHEDULE.days||[]).map((d,i)=>[i,d]).filter(([i,d])=>(d.refs||[]).length);
-  if(days.length){ L.push('## 14-day schedule');
+  if(days.length){ D.push('## 14-day schedule');
     days.forEach(([i,d])=>{ const t=(d.refs||[]).map(resolveRef).filter(Boolean).map(r=>r.o.t);
-      L.push(`- Day ${i+1}${d.focus?' · '+d.focus:''}: ${t.join('; ')}`); });
-    L.push(''); }
+      D.push(`- Day ${i+1}${d.focus?' · '+d.focus:''}: ${t.join('; ')}`); });
+    D.push(''); }
   if(SIM&&SIM.priors){ const p=SIM.priors, a=SIM.alloc;
-    L.push('## Invest & Simulate (Monte Carlo)');
-    L.push(`- Price ~$${a.price} · revenue goal $${p.goalRevenue} · paid spend $${a.paidSpend} · ${a.buildHrs}h on features${a.delegate&&a.delegate.length?' · '+a.delegate.length+' delegated':''}`);
-    L.push(''); }
-  return L.join('\n').replace(/\n{3,}/g,'\n\n').trim();
+    D.push('## Invest & Simulate (Monte Carlo)');
+    D.push(`- Price ~$${a.price} · revenue goal $${p.goalRevenue} · paid spend $${a.paidSpend} · ${a.buildHrs}h on features${a.delegate&&a.delegate.length?' · '+a.delegate.length+' delegated':''}`);
+    D.push(''); }
+
+  // ----- pull out the open priorities + setup tasks for the action asks -----
+  const openHi=[], setup=[]; let openSteps=0, openItems=0, openH=0;
+  AREAS.forEach(a=>{ if(a.pruned) return;
+    a.steps.forEach(s=>{ if(s.done) return; openSteps++; openH+=s.hrs||0;
+      if(s.prio==='hi') openHi.push(`${s.t} — ${a.t} (${s.hrs}h)`);
+      if(SETUP_RE.test(s.t)) setup.push(`${s.t} — ${a.t}`); });
+    (a.items||[]).forEach(it=>{ if(it.done) return; openItems++;
+      if(SETUP_RE.test(it.t)) setup.push(`${it.t} — ${a.t}`); });
+  });
+  const uniq=arr=>[...new Set(arr)];
+
+  // ----- assemble the action prompt around the state -----
+  const P=[];
+  P.push(`You are my launch co-pilot — an expert product-launch operator who DOES the work, not just advises. Below is the complete current state of my 2-week product launch, exported from my planning tool. I'm bringing it to you to actually get it done.`);
+  P.push('');
+  P.push('How to help me:');
+  P.push(`- Be concrete and real-world: name the exact tools, URLs, accounts, and costs, and give click-by-click steps.`);
+  P.push(`- Where you can, PRODUCE the deliverable itself — the ad copy, the outreach DMs, the landing-page headline, the entity/LLC filing steps, the spec I'd hand a developer (or you) — not vague advice.`);
+  P.push(`- Respect my budget (${BUDGET.timeHrs}h and $${BUDGET.money} over 2 weeks). I have limited focus for building but can knock out marketing in parallel — keep both sides moving.`);
+  P.push(`- Front-load anything with real-world lead time (account sign-ups, approvals, entity filings, app-store review).`);
+  P.push(`- If you need a decision or info I haven't given (location, audience, price), ASK me before assuming.`);
+  P.push('');
+  P.push('====================  PROJECT STATE  ====================');
+  P.push(D.join('\n').replace(/\n{3,}/g,'\n\n').trim());
+  P.push('');
+  P.push('====================  WHAT I NEED  ====================');
+  P.push(`My goal: launch ${NAME} within 2 weeks${VISION?` — ${VISION}`:''}.`);
+  P.push(`Open work right now: ${openSteps} steps + ${openItems} fifteen-minute items (~${Math.round(openH)}h of build steps).`);
+  if(setup.length){ P.push(''); P.push('Setup tasks with real-world lead time — help me fire these TODAY so they don’t block me later:'); uniq(setup).slice(0,8).forEach(t=>P.push(`- ${t}`)); }
+  if(openHi.length){ P.push(''); P.push('Highest-priority open steps:'); uniq(openHi).slice(0,8).forEach(t=>P.push(`- ${t}`)); }
+  P.push('');
+  P.push('Now do this:');
+  P.push('1. Tell me the single most important thing to do next, and why.');
+  P.push('2. Give me a concrete plan for TODAY — a handful of tasks I can actually finish, mixing build and marketing, with exact steps/links for each.');
+  P.push('3. For each task, produce whatever you can right now (copy, scripts, specs, filing steps) so I can just execute.');
+  P.push('4. Flag anything missing for a real launch that isn’t in my plan yet (legal/entity, payments, analytics, support).');
+  P.push('');
+  P.push('Start now.');
+  return P.join('\n');
 }
 function openExport(){ const ta=$('#xtext'); ta.value=exportText(); $('#xmodal').classList.add('on'); ta.focus(); ta.select(); }
 function closeExport(){ $('#xmodal').classList.remove('on'); }

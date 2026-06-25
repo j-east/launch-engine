@@ -377,7 +377,10 @@ const SVGNS='http://www.w3.org/2000/svg';
 const $=s=>document.querySelector(s);
 const HCOL={left:'#6FB0D6',right:'#E89156'};
 const PCOL={hi:'#FF7A6B',med:'#E8B45C',lo:'#6B7280'};
-const CX=800,CY=560,R_AREA=300,STEP_DIST=170;
+// outline layout — columns by depth (X), rows stacked (Y), so the map reads like an aligned list
+const PAD=60, GAP=104, W_VIS=272, W_AREA=232, W_CHILD=380, W_ITEM=476, STEP_RH=32, ITEM_RH=46, ITEM_H=40, ITEM_CHARS=62, AREA_GAP=16, TOP=46;
+const MAXCW=Math.max(W_CHILD,W_ITEM);
+let CW=1600, CH=1160, VIS={x:PAD,y:560};
 const trunc=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s;
 function wrap(str,maxChars,maxLines){
   const words=(str||'').trim().split(/\s+/).filter(Boolean);
@@ -406,58 +409,79 @@ const slugStage=sl=>{const e=STAGES.find(s=>stageSlug(s[0])===sl);return e?e[0]:
 function setUrlTab(){ try{ const u=new URL(location.href); u.searchParams.set('tab',stageSlug(stage)); history.replaceState(null,'',u.href); }catch(e){} }
 function goStage(s){ stage=s; renderTabs(); applyStage(); setUrlTab(); }
 
-// ---------- layout (radiate from center) ----------
-function fan(arr,ang,ox,oy,dist,maxSpread){ const n=arr.length, spread=Math.min(maxSpread,20*n);
-  arr.forEach((s,j)=>{ const so=n===1?0:(j/(n-1)-0.5)*spread; const sa=ang+so*Math.PI/180;
-    s._x=ox+Math.cos(sa)*dist; s._y=oy+Math.sin(sa)*dist; }); }
+// ---------- layout (left→right outline; x = depth/column, y = stacked rows) ----------
+function areaOrder(){ return [...AREAS.filter(a=>a.h==='left'), ...AREAS.filter(a=>a.h==='right')]; }
+// bilateral outline: Vision centered, BUILD (left brain) extends left, MARKET (right brain) extends right
 function layout(){
-  const place=(arr,a0,a1)=>arr.forEach((a,i)=>{
-    const t=arr.length===1?0.5:i/(arr.length-1);
-    const ang=(a0+(a1-a0)*t)*Math.PI/180; a._ang=ang;
-    a._x=CX+Math.cos(ang)*R_AREA; a._y=CY+Math.sin(ang)*R_AREA;
-    fan(a.steps,ang,a._x,a._y,STEP_DIST,82);              // steps: inner fan
-    fan(a.items||[],ang,a._x,a._y,STEP_DIST+120,104);     // 15-min items: outer fan
-  });
-  place(AREAS.filter(a=>a.h==='right'),-78,78);
-  place(AREAS.filter(a=>a.h==='left'),102,258);
+  const left=AREAS.filter(a=>a.h==='left'), right=AREAS.filter(a=>a.h==='right');
+  const extent=W_VIS/2+GAP+W_AREA+GAP+MAXCW, CENTER=PAD+extent;
+  const xAreaR=CENTER+W_VIS/2+GAP;          // market area left edge (child columns extend right)
+  const xAreaL=CENTER-W_VIS/2-GAP-W_AREA;   // build area left edge (child columns extend left)
+  const layside=(arr,side,xA)=>{            // lay from y=0; return the block's height
+    const childLeft=xA+W_AREA+GAP, childRight=xA-GAP;   // child column anchored on its center-facing edge
+    let y=0;
+    arr.forEach(a=>{ a._x=xA; a._side=side;
+      const kids=[...a.steps.map(s=>[s,false]), ...(a.items||[]).map(it=>[it,true])];
+      if(kids.length){
+        kids.forEach(([k,isItem])=>{ const w=isItem?W_ITEM:W_CHILD, rh=isItem?ITEM_RH:STEP_RH;
+          k._side=side; k._w=w; k._x=side==='left'?childRight-w:childLeft; k._y=y+rh/2; y+=rh; });
+        a._y=(kids[0][0]._y+kids[kids.length-1][0]._y)/2;
+      } else { a._y=y+STEP_RH/2; y+=STEP_RH; }
+      y+=AREA_GAP; });
+    return arr.length ? y-AREA_GAP : 0;
+  };
+  const lh=layside(left,'left',xAreaL), rh=layside(right,'right',xAreaR);
+  const totalH=Math.max(lh,rh,1);
+  const shift=(arr,dy)=>arr.forEach(a=>{ a._y+=dy; [...a.steps,...(a.items||[])].forEach(k=>k._y+=dy); });
+  shift(left, TOP+(totalH-lh)/2);                   // center each hemisphere vertically within the taller side
+  shift(right, TOP+(totalH-rh)/2);
+  VIS={ x:CENTER-W_VIS/2, cx:CENTER, y:TOP+totalH/2 };
+  CW=Math.max(1100, CENTER+extent+PAD);
+  CH=Math.max(620, TOP+totalH+TOP);
 }
 const agg=a=>{const tot=a.steps.reduce((s,x)=>s+x.hrs,0),dn=a.steps.filter(x=>x.done);
   return {tot,frac:tot?dn.reduce((s,x)=>s+x.hrs,0)/tot:1,doneN:dn.length,n:a.steps.length,
     openH:tot-dn.reduce((s,x)=>s+x.hrs,0),openC:a.steps.filter(x=>!x.done).reduce((s,x)=>s+x.cost,0)};};
 
 // ---------- render map ----------
+// ComfyUI-style cubic-bezier "noodle" (flat-S) from a parent's right edge to a child's left edge
+function noodle(px,py,cx,cy,color,op,dir){
+  dir=dir||1; const cp=Math.max(Math.abs(cx-px)*0.45,24);   // control points leave/enter horizontally toward each other
+  const d=`M ${px} ${py} C ${px+dir*cp} ${py}, ${cx-dir*cp} ${cy}, ${cx} ${cy}`;
+  return `<path d="${d}" fill="none" stroke="${color}" stroke-width="5" opacity="${(op*0.22).toFixed(3)}" filter="url(#glow)"/>`
+       + `<path d="${d}" fill="none" stroke="${color}" stroke-width="1.4" opacity="${op}"/>`;
+}
 function buildMap(){
   layout();
+  const map=$('#map'), cv=document.getElementById('dotfield'), canvas=$('#canvas');
+  map.setAttribute('viewBox',`0 0 ${CW} ${CH}`); map.setAttribute('width',CW); map.setAttribute('height',CH);
+  if(canvas){ canvas.style.width=CW+'px'; canvas.style.height=CH+'px'; }
+  if(cv){ cv.width=CW; cv.height=CH; }
   let s=`<defs>
-    <radialGradient id="gi" cx="42%" cy="34%" r="70%"><stop offset="0" stop-color="#EAD9F6" stop-opacity=".97"/><stop offset="55%" stop-color="#A985C8" stop-opacity=".85"/><stop offset="1" stop-color="#5A3E76" stop-opacity=".8"/></radialGradient>
-    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6FB0D6"/><stop offset="0.5" stop-color="#C9A8E0"/><stop offset="1" stop-color="#E89156"/></linearGradient>
-    <radialGradient id="hub" cx="40%" cy="28%" r="82%"><stop offset="0" stop-color="#4E3970"/><stop offset="55%" stop-color="#2A1E40"/><stop offset="1" stop-color="#181024"/></radialGradient>
-    <filter id="glow" x="-120%" y="-120%" width="340%" height="340%"><feGaussianBlur stdDeviation="5"/></filter>
-    <filter id="bloom" x="-160%" y="-160%" width="420%" height="420%"><feGaussianBlur stdDeviation="11"/></filter>
+    <radialGradient id="hub" cx="34%" cy="22%" r="120%"><stop offset="0" stop-color="#4E3970"/><stop offset="55%" stop-color="#2A1E40"/><stop offset="1" stop-color="#181024"/></radialGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4"/></filter>
   </defs>`;
-  // connectors center->area (soft glow under + bright core), and area->step
-  AREAS.forEach(a=>{const c=HCOL[a.h];
-    const d=`M ${CX} ${CY} Q ${(CX+a._x)/2} ${(CY+a._y)/2} ${a._x} ${a._y}`;
-    s+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="6" opacity=".16" filter="url(#glow)"/>`;
-    s+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="1.6" opacity=".7"/>`;
-    a.steps.forEach(st=>{ const dl=`M ${a._x} ${a._y} L ${st._x} ${st._y}`;
-      s+=`<path d="${dl}" stroke="${c}" stroke-width="3.5" opacity=".11" filter="url(#glow)"/>`;
-      s+=`<path d="${dl}" stroke="${c}" stroke-width="1" opacity=".5"/>`;});
-    (a.items||[]).forEach(it=>{ const dl=`M ${a._x} ${a._y} L ${it._x} ${it._y}`;
-      s+=`<path d="${dl}" stroke="${c}" stroke-width="1" opacity=".26" stroke-dasharray="2 4"/>`;});
+  // center divider + hemisphere headers (left-brain build / right-brain market)
+  s+=`<line x1="${VIS.cx}" y1="0" x2="${VIS.cx}" y2="${CH}" stroke="#C9A8E0" stroke-opacity=".06" stroke-width="2"/>`;
+  s+=`<text x="${VIS.cx-W_VIS/2-GAP}" y="24" text-anchor="end" font-family="var(--mono)" font-size="10.5" letter-spacing="2.5" fill="#6FB0D6" fill-opacity=".5">◧ MATERIAL · BUILD</text>`;
+  s+=`<text x="${VIS.cx+W_VIS/2+GAP}" y="24" text-anchor="start" font-family="var(--mono)" font-size="10.5" letter-spacing="2.5" fill="#E89156" fill-opacity=".5">IMMATERIAL · MARKET ◨</text>`;
+  // curved connectors — mirrored: build curves left, market curves right
+  areaOrder().forEach(a=>{ const c=HCOL[a.h], L=a._side==='left', dir=L?-1:1;
+    const vOut=L?VIS.cx-W_VIS/2:VIS.cx+W_VIS/2, aIn=L?a._x+W_AREA:a._x, aOut=L?a._x:a._x+W_AREA;
+    s+=noodle(vOut, VIS.y, aIn, a._y, c, .6, dir);
+    a.steps.forEach(st=>{ s+=noodle(aOut, a._y, L?st._x+st._w:st._x, st._y, c, .5, dir); });
+    (a.items||[]).forEach(it=>{ s+=noodle(aOut, a._y, L?it._x+it._w:it._x, it._y, c, .3, dir); });
   });
   s+=`<g id="nodes"></g>`;
-  $('#map').innerHTML=s;
+  map.innerHTML=s;
   const g=$('#nodes');
-
-  // center vision node
   g.appendChild(visionNode());
-  // areas + steps
-  AREAS.forEach(a=>{
+  areaOrder().forEach(a=>{
     g.appendChild(areaNode(a));
     a.steps.forEach(st=>g.appendChild(stepNode(a,st)));
     (a.items||[]).forEach(it=>g.appendChild(itemNode(a,it)));
   });
+  if(_dfResize) _dfResize();
   paintSel();
   renderTasks();
 }
@@ -509,79 +533,70 @@ function mk(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k i
 function group(x,y,cls,onclick){const grp=mk('g',{class:cls,transform:`translate(${x},${y})`});grp.addEventListener('click',onclick);return grp;}
 
 function visionNode(){
-  const grp=group(CX,CY,'node vision'+(sel.type==='vision'?' sel':''),()=>focusNode('vision',null,CX,CY));
-  const R=96;
-  grp.appendChild(mk('circle',{class:'ring-sel',r:R+22,fill:'none',stroke:'#C9A8E0','stroke-width':1.5}));
-  grp.appendChild(mk('circle',{r:R+14,fill:'url(#gi)','fill-opacity':.42,filter:'url(#bloom)'}));            // bloom halo
-  grp.appendChild(mk('circle',{r:R+16,fill:'none',stroke:'#C9A8E0','stroke-opacity':.22,'stroke-width':2,filter:'url(#glow)'}));  // soft glow ring
-  grp.appendChild(mk('circle',{r:R,fill:'url(#hub)',stroke:'#E6D4F4','stroke-opacity':.7,'stroke-width':1.5,class:'shape'}));   // dark glass hub
-  grp.appendChild(mk('ellipse',{cx:-22,cy:-44,rx:44,ry:19,fill:'#ffffff','fill-opacity':.10}));             // specular highlight
-  const lab=mk('text',{'text-anchor':'middle','font-size':11,'font-weight':700,fill:'#C6A9E4','letter-spacing':'2.5',y:-54});lab.textContent='THE VISION';grp.appendChild(lab);
-  // product name (light, up to 2 lines)
-  const nl=wrap(NAME,18,2), nStart=-22-(nl.length-1)*10;
-  nl.forEach((ln,i)=>{const t=mk('text',{'text-anchor':'middle','font-size':17,'font-weight':700,fill:'#F4ECFB',y:nStart+i*20});t.textContent=ln;grp.appendChild(t);});
-  // vision text inside the hub (up to 4 lines)
-  const vy=nStart+nl.length*20+12;
-  const vl=VISION?wrap(VISION,24,4):['Set a vision in the','Intake tab →'];
-  vl.forEach((ln,i)=>{const t=mk('text',{'text-anchor':'middle','font-size':12,fill:'#D8CBEC',y:vy+i*16});t.textContent=ln;grp.appendChild(t);});
+  const W=W_VIS, mid=W/2, cx=VIS.x, cy=VIS.y;
+  const nl=wrap(NAME,24,2);
+  const vl=VISION?wrap(VISION,36,4):['Set a vision in Intake →'];
+  const lines=[ {t:'THE VISION',f:10,w:700,c:'#C6A9E4',ls:'2.5',h:22},
+    ...nl.map(t=>({t,f:16,w:700,c:'#F4ECFB',h:21})),
+    ...vl.map(t=>({t,f:11.5,w:400,c:'#D8CBEC',h:16})) ];
+  const padTop=16, padBot=15, blockH=lines.reduce((s,l)=>s+l.h,0), H=Math.max(112, padTop+blockH+padBot);
+  const grp=group(cx,cy,'node vision'+(sel.type==='vision'?' sel':''),()=>focusNode('vision',null,cx+W/2,cy+H/2));
+  grp.setAttribute('id','node-vision'); grp.setAttribute('data-nid','vision');
+  grp.appendChild(mk('rect',{class:'ring-sel',x:-6,y:-H/2-6,width:W+12,height:H+12,rx:16,fill:'none',stroke:'#C9A8E0','stroke-width':1.5}));
+  grp.appendChild(mk('rect',{x:0,y:-H/2,width:W,height:H,rx:14,fill:'url(#hub)',stroke:'#E6D4F4','stroke-opacity':.6,'stroke-width':1.4,class:'shape'}));
+  let yy=-H/2+padTop;
+  lines.forEach(l=>{ yy+=l.h; const t=mk('text',{x:mid,y:yy-5,'text-anchor':'middle','font-size':l.f,'font-weight':l.w,fill:l.c});
+    if(l.ls)t.setAttribute('letter-spacing',l.ls); t.textContent=l.t; grp.appendChild(t); });
   grp.addEventListener('mousemove',e=>showTip(e,'<b>The Vision</b><br>'+esc(VISION||'(not set yet)')));grp.addEventListener('mouseleave',hideTip);
   return grp;
 }
 function areaNode(a){
-  const ag=agg(a), r=20, c=HCOL[a.h];
+  const ag=agg(a), c=HCOL[a.h], W=W_AREA, H=48, L=a._side==='left';
   const grp=group(a._x,a._y,'node area '+(a.pruned?'pruned ':'')+(sel.type==='area'&&sel.id===a.id?'sel':''),
-    ()=>focusNode('area',a.id,a._x,a._y));
-  grp.setAttribute('data-nid',a.id);
-  grp.appendChild(mk('circle',{class:'ring-sel',r:r+11,fill:'none',stroke:c,'stroke-width':1.5}));
-  grp.appendChild(mk('circle',{r:r+11,fill:c,'fill-opacity':.30,filter:'url(#glow)',class:'halo'}));   // glow halo
-  grp.appendChild(mk('circle',{r:r+6,fill:'none',stroke:'#2A2F37','stroke-width':3}));
-  const circ=2*Math.PI*(r+6);
-  grp.appendChild(mk('circle',{r:r+6,fill:'none',stroke:'#5FBE9C','stroke-width':3,'stroke-linecap':'round',transform:'rotate(-90)','stroke-dasharray':`${(ag.frac*circ).toFixed(1)} ${circ.toFixed(1)}`}));
-  if(a.h==='left'){let p='';for(let i=0;i<6;i++){const an=Math.PI/6+i*Math.PI/3;p+=`${(Math.cos(an)*r).toFixed(1)},${(Math.sin(an)*r).toFixed(1)} `;}
-    grp.appendChild(mk('polygon',{points:p.trim(),fill:c,'fill-opacity':.92,stroke:'#C5E5F8','stroke-opacity':.7,'stroke-width':1.4,class:'shape'}));}
-  else grp.appendChild(mk('circle',{r,fill:c,'fill-opacity':.92,stroke:'#F8D2AC','stroke-opacity':.7,'stroke-width':1.4,class:'shape'}));
-  const lbl=mk('text',{'text-anchor':'middle','font-size':13,'font-weight':600,fill:'#ECE9E3',y:r+19});lbl.textContent=a.t;grp.appendChild(lbl);
-  const sub=mk('text',{'text-anchor':'middle','font-size':10.5,fill:'#7C766C',y:r+34});sub.textContent=a.sub||(a.h==='left'?'build':'market');grp.appendChild(sub);
-  const tally=mk('text',{'text-anchor':'middle','font-size':9.5,fill:'#534E46','font-family':'var(--mono)',y:r+47});tally.textContent=`${ag.doneN}/${ag.n} done · ${ag.openH}h`;grp.appendChild(tally);
-  grp.addEventListener('mousemove',e=>showTip(e,`<b>${a.t}</b><br>${ag.doneN}/${ag.n} done · ${ag.openH}h left${a.pruned?' · pruned':''}`));grp.addEventListener('mouseleave',hideTip);
+    ()=>focusNode('area',a.id,a._x+W/2,a._y+H/2));
+  grp.setAttribute('data-nid',a.id); grp.setAttribute('id','node-'+a.id);
+  grp.appendChild(mk('rect',{class:'ring-sel',x:-5,y:-H/2-5,width:W+10,height:H+10,rx:12,fill:'none',stroke:c,'stroke-width':1.5}));
+  grp.appendChild(mk('rect',{x:0,y:-H/2,width:W,height:H,rx:10,fill:'#1A1D23',stroke:c,'stroke-opacity':.55,'stroke-width':1.3,class:'shape'}));
+  grp.appendChild(mk('rect',{x:L?W-5:0,y:-H/2,width:5,height:H,fill:c,'fill-opacity':.9}));   // accent on the center-facing edge
+  const tx=L?W-16:16, ta=L?'end':'start';
+  const lbl=mk('text',{x:tx,y:-3,'text-anchor':ta,'font-size':14,'font-weight':600,fill:'#ECE9E3'});lbl.textContent=trunc(a.t,22);grp.appendChild(lbl);
+  const sub=mk('text',{x:tx,y:13,'text-anchor':ta,'font-size':10,fill:'#7C766C'});sub.textContent=a.sub||(a.h==='left'?'build':'market');grp.appendChild(sub);
+  const tally=mk('text',{x:L?14:W-12,y:-3,'text-anchor':L?'start':'end','font-size':10,'font-family':'var(--mono)',fill:'#6B655A'});tally.textContent=`${ag.doneN}/${ag.n}`;grp.appendChild(tally);
+  grp.appendChild(mk('rect',{x:16,y:H/2-9,width:W-30,height:3,rx:1.5,fill:'#2A2F37'}));
+  grp.appendChild(mk('rect',{x:L?(16+(W-30)*(1-ag.frac)).toFixed(1):16,y:H/2-9,width:((W-30)*ag.frac).toFixed(1),height:3,rx:1.5,fill:'#5FBE9C'}));
+  grp.addEventListener('mousemove',e=>showTip(e,`<b>${esc(a.t)}</b><br>${ag.doneN}/${ag.n} done · ${ag.openH}h left${a.pruned?' · pruned':''}`));grp.addEventListener('mouseleave',hideTip);
   return grp;
 }
 function stepNode(a,st){
-  const col=st.done?'#5FBE9C':PCOL[st.prio], r=st.done?6:8;
+  const col=st.done?'#5FBE9C':PCOL[st.prio], W=st._w||W_CHILD, H=28, L=st._side==='left';
   const grp=group(st._x,st._y,'node step '+(sel.type==='step'&&sel.id===st.id?'sel':''),
-    e=>{e.stopPropagation();focusNode('step',st.id,st._x,st._y);});
-  grp.setAttribute('data-nid',st.id);
-  grp.appendChild(mk('circle',{class:'ring-sel',r:r+6,fill:'none',stroke:col,'stroke-width':1.4}));
-  grp.appendChild(mk('circle',{r:r+5,fill:col,'fill-opacity':st.done?.2:.42,filter:'url(#glow)'}));   // glow halo
-  grp.appendChild(mk('circle',{r,fill:col,'fill-opacity':st.done?.5:.95,stroke:'#0B0D11','stroke-width':1.4,class:'shape'}));
-  if(st.done){const ck=mk('path',{d:'M -3 0 L -1 2 L 3 -2',fill:'none',stroke:'#0E0F12','stroke-width':1.6});grp.appendChild(ck);}
-  // outward title + estimate
-  const dx=st._x-CX,dy=st._y-CY,L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L;
-  const anchor=ux<-0.25?'end':ux>0.25?'start':'middle';
-  const lx=ux*(r+8), ly=uy*(r+8)+(anchor==='middle'?(uy<0?-6:13):3.5);
-  const lbl=mk('text',{'text-anchor':anchor,'font-size':11.5,'font-weight':500,fill:st.done?'#534E46':'#D4CEC2',x:lx,y:ly});
-  lbl.textContent=trunc(st.t,28); if(st.done)lbl.setAttribute('text-decoration','line-through'); grp.appendChild(lbl);
-  const est=mk('text',{'text-anchor':anchor,'font-size':9,fill:'#6B655A','font-family':'var(--mono)',x:lx,y:ly+12});
-  est.textContent=`${st.hrs}h${st.cost?' · $'+st.cost:''} · ${st.prio}`; grp.appendChild(est);
-  grp.addEventListener('mousemove',e=>showTip(e,`<b>${st.t}</b><br>${st.hrs}h${st.cost?' · $'+st.cost:''} · ${st.prio}${st.done?' · done':''}`));grp.addEventListener('mouseleave',hideTip);
+    e=>{e.stopPropagation();focusNode('step',st.id,st._x+W/2,st._y+H/2);});
+  grp.setAttribute('data-nid',st.id); grp.setAttribute('id','node-'+st.id);
+  grp.appendChild(mk('rect',{class:'ring-sel',x:-4,y:-H/2-4,width:W+8,height:H+8,rx:9,fill:'none',stroke:col,'stroke-width':1.3}));
+  grp.appendChild(mk('rect',{x:0,y:-H/2,width:W,height:H,rx:7,fill:'#16181D',stroke:col,'stroke-opacity':st.done?.3:.6,'stroke-width':1.2,class:'shape'}));
+  grp.appendChild(mk('circle',{cx:L?W-15:15,cy:0,r:4,fill:col,'fill-opacity':st.done?.5:1}));
+  const lbl=mk('text',{x:L?W-27:27,y:4,'text-anchor':L?'end':'start','font-size':12.5,'font-weight':500,fill:st.done?'#6B655A':'#D4CEC2'});
+  lbl.textContent=trunc(st.t,44); if(st.done)lbl.setAttribute('text-decoration','line-through'); grp.appendChild(lbl);
+  const est=mk('text',{x:L?12:W-12,y:4,'text-anchor':L?'start':'end','font-size':9.5,'font-family':'var(--mono)',fill:'#6B655A'});
+  est.textContent=`${st.hrs}h${st.cost?' · $'+st.cost:''}`; grp.appendChild(est);
+  grp.addEventListener('mousemove',e=>showTip(e,`<b>${esc(st.t)}</b><br>${st.hrs}h${st.cost?' · $'+st.cost:''} · ${st.prio}${st.done?' · done':''}`));grp.addEventListener('mouseleave',hideTip);
   return grp;
 }
-// 15-min action items as small square leaf nodes (outer ring); click toggles done
+// 15-min action items as wide checklist rows; label wraps to 2 lines; click toggles done
 function itemNode(a,it){
-  const c=it.done?'#5FBE9C':HCOL[a.h], r=it.done?4:5;
+  const c=it.done?'#5FBE9C':HCOL[a.h], W=it._w||W_ITEM, H=ITEM_H, L=it._side==='left';
   const grp=group(it._x,it._y,'node item'+(it.done?' done':''),
     e=>{ e.stopPropagation(); it.done=!it.done; touch(); buildMap(); renderTasks(); flashIds.add(it.id); applyFlash();
       replan(`Founder ${it.done?'completed':'reopened'} the 15-min task “${it.t}” in area “${a.t}”.`); });
-  grp.setAttribute('data-nid',it.id);
-  grp.appendChild(mk('circle',{class:'ring-sel',r:r+5,fill:'none',stroke:c,'stroke-width':1.2}));
-  grp.appendChild(mk('circle',{r:r+4,fill:c,'fill-opacity':it.done?.16:.3,filter:'url(#glow)'}));
-  grp.appendChild(mk('rect',{x:-r,y:-r,width:2*r,height:2*r,rx:1.5,fill:c,'fill-opacity':it.done?.45:.9,stroke:'#0B0D11','stroke-width':1.2,class:'shape'}));
-  if(it.done)grp.appendChild(mk('path',{d:'M -2.4 0 L -0.6 1.8 L 2.6 -1.8',fill:'none',stroke:'#0E0F12','stroke-width':1.5}));
-  const dx=it._x-CX,dy=it._y-CY,L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L;
-  const anchor=ux<-0.25?'end':ux>0.25?'start':'middle';
-  const lx=ux*(r+6), ly=uy*(r+6)+(anchor==='middle'?(uy<0?-4:10):3);
-  const lbl=mk('text',{'text-anchor':anchor,'font-size':9.5,fill:it.done?'#534E46':'#A7A095',x:lx,y:ly});
-  lbl.textContent=trunc(it.t,22); if(it.done)lbl.setAttribute('text-decoration','line-through'); grp.appendChild(lbl);
+  grp.setAttribute('data-nid',it.id); grp.setAttribute('id','node-'+it.id);
+  grp.appendChild(mk('rect',{class:'ring-sel',x:-4,y:-H/2-4,width:W+8,height:H+8,rx:9,fill:'none',stroke:c,'stroke-width':1.2}));
+  grp.appendChild(mk('rect',{x:0,y:-H/2,width:W,height:H,rx:8,fill:'#13151A',stroke:c,'stroke-opacity':it.done?.25:.42,'stroke-width':1,class:'shape'}));
+  const cbx=L?W-22:10;
+  grp.appendChild(mk('rect',{x:cbx,y:-6,width:12,height:12,rx:3,fill:it.done?c:'none','fill-opacity':it.done?.9:1,stroke:c,'stroke-opacity':.8,'stroke-width':1.4}));
+  if(it.done)grp.appendChild(mk('path',{d:`M ${cbx+3} 0.2 L ${cbx+5.4} 2.6 L ${cbx+9.2} -1.8`,fill:'none',stroke:'#0E0F12','stroke-width':1.7}));
+  const lines=wrap(it.t, ITEM_CHARS, 2), tx=L?W-31:31, ta=L?'end':'start', y0=lines.length>1?-3:4;
+  lines.forEach((ln,i)=>{ const t=mk('text',{x:tx,y:y0+i*15,'text-anchor':ta,'font-size':11.5,fill:it.done?'#6B655A':'#B9B4AA'});
+    t.textContent=ln; if(it.done)t.setAttribute('text-decoration','line-through'); grp.appendChild(t); });
   grp.addEventListener('mousemove',e=>showTip(e,`<b>${esc(it.t)}</b><br>15-min item${it.done?' · done':''} · click to ${it.done?'reopen':'complete'}`));grp.addEventListener('mouseleave',hideTip);
   return grp;
 }
@@ -1367,7 +1382,7 @@ function rerenderAll(){
   const b=$('#bubble'); if(b)b.style.display='none';
   buildMap(); renderSide(); renderTasks();
   const mw=document.querySelector('.mapwrap');
-  requestAnimationFrame(()=>{ mw.scrollLeft=(1600-mw.clientWidth)/2; mw.scrollTop=(1160-mw.clientHeight)/2; });
+  requestAnimationFrame(()=>{ mw.scrollLeft=Math.max(0, VIS.cx - mw.clientWidth/2); mw.scrollTop=Math.max(0, VIS.y - mw.clientHeight/2); });
 }
 function gotoConcept(id){ const u=new URL(location.href); u.searchParams.set('c',id); location.assign(u.href); }   // reload on the chosen concept, keeping the current tab
 async function switchConcept(id){ if(id===CID) return; await save(true); gotoConcept(id); }
@@ -1393,19 +1408,20 @@ function setSide(open){ document.body.classList.toggle('side-closed', !open); up
 // reactbits-style Dot Field behind the map (bulge displacement + diagonal gradient + cursor glow)
 const DF={ dotRadius:1.5, dotSpacing:14, cursorRadius:500, bulgeStrength:7, glowRadius:160,
   gradientFrom:'rgba(168,85,247,0.35)', gradientTo:'rgba(180,151,207,0.25)', glowColor:'rgba(170,120,230,0.16)' };
+let _dfResize=null;   // rebuild the dot grid when the canvas resizes (set by initDotField)
 function initDotField(){
   const cv=document.getElementById('dotfield'); if(!cv) return;
-  const ctx=cv.getContext('2d'); const W=1600,H=1160,TAU=6.2832;
+  const ctx=cv.getContext('2d'); const TAU=6.2832;
   const R=DF.dotRadius, CR=DF.cursorRadius, CR2=CR*CR, BS=DF.bulgeStrength;
-  const dots=[]; for(let y=DF.dotSpacing/2;y<H;y+=DF.dotSpacing) for(let x=DF.dotSpacing/2;x<W;x+=DF.dotSpacing) dots.push([x,y]);
-  const grad=ctx.createLinearGradient(0,0,W,H); grad.addColorStop(0,DF.gradientFrom); grad.addColorStop(1,DF.gradientTo);
+  let W=cv.width,H=cv.height,dots=[],grad=null;
   let mx=-1e5,my=-1e5,tx=mx,ty=my,running=false;
   const mw=document.querySelector('.mapwrap');
   function draw(){
     ctx.clearRect(0,0,W,H);
-    if(tx>-9e4){ const g=ctx.createRadialGradient(mx,my,0,mx,my,DF.glowRadius);
-      g.addColorStop(0,DF.glowColor); g.addColorStop(1,'rgba(170,120,230,0)');
-      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(mx,my,DF.glowRadius,0,TAU); ctx.fill(); }
+    if(tx>-9e4){ const gg=ctx.createRadialGradient(mx,my,0,mx,my,DF.glowRadius);
+      gg.addColorStop(0,DF.glowColor); gg.addColorStop(1,'rgba(170,120,230,0)');
+      ctx.fillStyle=gg; ctx.beginPath(); ctx.arc(mx,my,DF.glowRadius,0,TAU); ctx.fill(); }
+    if(!grad) return;
     ctx.fillStyle=grad; ctx.beginPath();
     for(const d of dots){ let x=d[0],y=d[1];
       const dx=x-mx, dy=y-my, d2=dx*dx+dy*dy;
@@ -1417,9 +1433,12 @@ function initDotField(){
   function frame(){ mx+=(tx-mx)*0.2; my+=(ty-my)*0.2; draw();
     if(tx>-9e4 || Math.abs(tx-mx)>0.5 || Math.abs(ty-my)>0.5) requestAnimationFrame(frame); else { draw(); running=false; } }
   function start(){ if(!running){ running=true; requestAnimationFrame(frame); } }
+  function rebuild(){ W=cv.width; H=cv.height; dots=[];
+    for(let y=DF.dotSpacing/2;y<H;y+=DF.dotSpacing) for(let x=DF.dotSpacing/2;x<W;x+=DF.dotSpacing) dots.push([x,y]);
+    grad=ctx.createLinearGradient(0,0,W,H); grad.addColorStop(0,DF.gradientFrom); grad.addColorStop(1,DF.gradientTo); draw(); }
   mw.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect(); tx=e.clientX-r.left; ty=e.clientY-r.top; start();});
   mw.addEventListener('pointerleave',()=>{tx=ty=-1e5; start();});
-  draw();   // initial static field
+  _dfResize=rebuild; rebuild();   // initial static field
 }
 
 async function boot(){

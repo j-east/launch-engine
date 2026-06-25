@@ -288,6 +288,18 @@
   /* drag-to-pan: grab on empty map, nodes keep their pointer */
   .canvas{cursor:grab;}
   .canvas.panning{cursor:grabbing;}
+  /* export-to-AI modal */
+  .modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(8,9,11,.6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
+  .modal.on{display:flex;}
+  .modal .box{width:min(700px,92vw);max-height:85vh;background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px -20px #000;}
+  .modal .mh{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line);}
+  .modal .mh h3{font-family:'Fraunces',serif;font-weight:500;font-size:18px;margin:0;}
+  .modal .mh .x{background:none;border:none;color:var(--faint);font-size:15px;cursor:pointer;}
+  .modal .mh .x:hover{color:var(--ink);}
+  .modal textarea{flex:1;min-height:340px;border:none;background:var(--bg);color:var(--ink-2);font-family:var(--mono);font-size:12px;line-height:1.55;padding:14px 16px;resize:none;outline:none;}
+  .modal .mf{display:flex;gap:10px;align-items:center;padding:12px 18px;border-top:1px solid var(--line);}
+  .modal .mf .hint{flex:1;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.4;}
+  .modal .mf .genbtn{margin:0;}
   .additem{margin-top:12px;width:100%;border:1px dashed var(--line);background:transparent;color:var(--muted);font-family:var(--mono);font-size:11px;padding:8px;border-radius:8px;cursor:pointer;transition:.2s;}
   .additem:hover{border-color:var(--idea);color:var(--ink-2);}
   @media(max-width:820px){
@@ -313,6 +325,7 @@
     <select id="cpick" class="cpick" title="Switch concept"></select>
     <button id="cnew" class="cnew" title="New concept">＋ new</button>
     <button id="cdel" class="cnew" title="Delete this concept">🗑</button>
+    <button id="cexport" class="cnew" title="Copy a project summary to paste into any AI">⤓ export to AI</button>
     <span class="kick"><span class="l">◧ build</span> / <span class="r">market ◨</span></span>
     <span class="spacer"></span>
     <span class="legend"><span><i style="background:var(--hi)"></i>high</span><span><i style="background:var(--med)"></i>med</span><span><i style="background:var(--lo)"></i>low</span><span><i style="background:var(--done)"></i>done</span></span>
@@ -344,6 +357,13 @@
   </div>
   <button id="sidehandle" class="handle" title="Show / hide co-pilot">‹</button>
   <div id="tip"></div>
+  <div id="xmodal" class="modal">
+    <div class="box">
+      <div class="mh"><h3>Export to your AI</h3><button class="x" id="xclose">✕</button></div>
+      <textarea id="xtext" readonly spellcheck="false"></textarea>
+      <div class="mf"><span class="hint">Paste this into ChatGPT, Claude, or any AI for full project context.</span><button class="cnew" id="xclose2">Close</button><button class="genbtn" id="xcopy">Copy</button></div>
+    </div>
+  </div>
 
 <script>
 // ---------- the active concept (loaded from / saved to Postgres; see boot()) ----------
@@ -378,7 +398,7 @@ const $=s=>document.querySelector(s);
 const HCOL={left:'#6FB0D6',right:'#E89156'};
 const PCOL={hi:'#FF7A6B',med:'#E8B45C',lo:'#6B7280'};
 // outline layout — columns by depth (X), rows stacked (Y), so the map reads like an aligned list
-const PAD=60, GAP=104, W_VIS=272, W_AREA=232, W_CHILD=380, W_ITEM=476, STEP_RH=32, ITEM_RH=46, ITEM_H=40, ITEM_CHARS=62, AREA_GAP=16, TOP=46;
+const PAD=60, GAP=64, W_VIS=272, W_AREA=232, W_CHILD=380, W_ITEM=476, STEP_RH=32, ITEM_RH=46, ITEM_H=40, ITEM_CHARS=62, AREA_GAP=16, TOP=46;
 const MAXCW=Math.max(W_CHILD,W_ITEM);
 let CW=1600, CH=1160, VIS={x:PAD,y:560};
 const trunc=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s;
@@ -1401,6 +1421,56 @@ async function delConcept(){
   else location.search='';   // none left → boot creates a fresh starter
 }
 
+// ---------- export to AI: a copyable plain-text digest of the whole concept ----------
+function exportText(){
+  const L=[];
+  L.push(`# ${NAME} — 2-week launch plan`);
+  if(VISION) L.push(`Vision: ${VISION}`);
+  L.push('');
+  const I=INTAKE, ctx=[];
+  if(I.problem) ctx.push(`- Problem: ${I.problem}`);
+  if(I.why) ctx.push(`- Why me / why now: ${I.why}`);
+  if(I.location) ctx.push(`- Based in: ${I.location}`);
+  const ev=[];
+  if(I.build && I.build!=='none') ev.push(`build: ${I.build}`);
+  if(I.url) ev.push(`url: ${I.url}`);
+  if(+I.waitlist) ev.push(`${I.waitlist} on waitlist`);
+  if(+I.paying) ev.push(`${I.paying} paying`);
+  if(+I.convos) ev.push(`${I.convos} customer convos`);
+  if(ev.length) ctx.push(`- Current state: ${ev.join(', ')}`);
+  if(ctx.length){ L.push('## Context'); L.push(...ctx); L.push(''); }
+  L.push('## Budget'); L.push(`- ${BUDGET.timeHrs}h over 2 weeks · $${BUDGET.money} cash · ~$${BUDGET.hourlyRate}/h time value`); L.push('');
+  const side=(h,label)=>{ const arr=AREAS.filter(a=>a.h===h); if(!arr.length) return;
+    L.push(`## ${label}`);
+    arr.forEach(a=>{ const ag=agg(a);
+      L.push(`### ${a.t}${a.pruned?' (pruned)':''} — ${ag.doneN}/${ag.n} steps done, ${ag.openH}h left`);
+      if(a.desc) L.push(a.desc);
+      a.steps.forEach(s=>L.push(`- [${s.done?'x':' '}] ${s.t} (${s.hrs}h${s.cost?', $'+s.cost:''}, ${s.prio})${s.desc?' — '+s.desc:''}`));
+      const its=(a.items||[]).filter(Boolean);
+      if(its.length){ L.push('  15-min items:'); its.forEach(it=>L.push(`  - [${it.done?'x':' '}] ${it.t}${it.notes?' — '+it.notes:''}`)); }
+      L.push(''); });
+  };
+  side('left','BUILD — material (left brain)');
+  side('right','MARKET — immaterial (right brain)');
+  const days=(SCHEDULE.days||[]).map((d,i)=>[i,d]).filter(([i,d])=>(d.refs||[]).length);
+  if(days.length){ L.push('## 14-day schedule');
+    days.forEach(([i,d])=>{ const t=(d.refs||[]).map(resolveRef).filter(Boolean).map(r=>r.o.t);
+      L.push(`- Day ${i+1}${d.focus?' · '+d.focus:''}: ${t.join('; ')}`); });
+    L.push(''); }
+  if(SIM&&SIM.priors){ const p=SIM.priors, a=SIM.alloc;
+    L.push('## Invest & Simulate (Monte Carlo)');
+    L.push(`- Price ~$${a.price} · revenue goal $${p.goalRevenue} · paid spend $${a.paidSpend} · ${a.buildHrs}h on features${a.delegate&&a.delegate.length?' · '+a.delegate.length+' delegated':''}`);
+    L.push(''); }
+  return L.join('\n').replace(/\n{3,}/g,'\n\n').trim();
+}
+function openExport(){ const ta=$('#xtext'); ta.value=exportText(); $('#xmodal').classList.add('on'); ta.focus(); ta.select(); }
+function closeExport(){ $('#xmodal').classList.remove('on'); }
+function copyExport(){ const ta=$('#xtext'); ta.select(); ta.setSelectionRange(0,ta.value.length);
+  const ok=()=>{ const b=$('#xcopy'); if(b){ b.textContent='✓ Copied'; setTimeout(()=>{ if(b) b.textContent='Copy'; },1500); } };
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(ta.value).then(ok,()=>{ try{document.execCommand('copy');}catch(e){} ok(); }); }
+  else { try{document.execCommand('copy');}catch(e){} ok(); }
+}
+
 // co-pilot drawer toggle (collapsible on desktop, off-canvas on mobile)
 function updateHandle(){ const h=$('#sidehandle'); if(h) h.textContent=document.body.classList.contains('side-closed')?'‹':'›'; }
 function setSide(open){ document.body.classList.toggle('side-closed', !open); updateHandle(); }
@@ -1465,6 +1535,11 @@ async function boot(){
   $('#cpick').addEventListener('change',e=>switchConcept(e.target.value));
   $('#cnew').addEventListener('click',newConcept);
   $('#cdel').addEventListener('click',delConcept);
+  $('#cexport').addEventListener('click',openExport);
+  $('#xclose').addEventListener('click',closeExport); $('#xclose2').addEventListener('click',closeExport);
+  $('#xcopy').addEventListener('click',copyExport);
+  $('#xmodal').addEventListener('click',e=>{ if(e.target===$('#xmodal')) closeExport(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeExport(); });
   document.addEventListener('click',e=>{ if(e.target.closest('.mmlink')){ goStage('mindmap'); } });
   $('#sidehandle').addEventListener('click',()=>setSide(document.body.classList.contains('side-closed')));
   if(window.innerWidth<=820) document.body.classList.add('side-closed');   // mobile: drawer starts hidden

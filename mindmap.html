@@ -126,6 +126,14 @@
   .bub-ai{margin:10px 13px 0;width:calc(100% - 26px);border:1px dashed var(--line);background:none;color:var(--muted);
     font-family:var(--mono);font-size:11px;padding:7px;border-radius:7px;cursor:pointer;}
   .bub-ai:hover{border-color:var(--bcol,#888);color:var(--ink-2);}
+  /* experiment block on the step bubble */
+  .exp{margin:10px 13px 0;border-top:1px solid var(--line);padding-top:9px;}
+  .exp-r{font-size:12.5px;color:var(--ink-2);line-height:1.5;margin-bottom:5px;}
+  .exp-r.res{color:var(--done);}
+  .exp-k{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-right:7px;min-width:42px;}
+  .bub-pr{margin-top:4px;width:calc(100% - 0px);border:1px solid var(--done);background:rgba(95,190,156,.08);color:var(--done);
+    font-family:var(--mono);font-size:11.5px;font-weight:700;padding:8px;border-radius:8px;cursor:pointer;}
+  .bub-pr:hover{background:rgba(95,190,156,.16);}
   /* co-pilot focus chip */
   .focuschip{margin:10px 18px 0;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--panel);
     font-size:12.5px;color:var(--ink-2);display:flex;align-items:center;gap:8px;}
@@ -682,12 +690,22 @@ function focusLine(){
   return '';
 }
 function saveDesc(v){ if(sel.type==='vision')VISION=v; else if(sel.type==='area'){const a=AREAS.find(x=>x.id===sel.id);if(a)a.desc=v;} else {const st=findStep(sel.id);if(st)st.desc=v;} touch(); }
+// the experiment block shown on a step bubble (the validation loop, made visible & one-tap)
+function experimentHTML(st,a){
+  const market=a&&a.h==='right', rows=[];
+  if(market&&st.bet) rows.push(`<div class="exp-r"><span class="exp-k">bet</span>${esc(st.bet)}</div>`);
+  if(market&&st.watch) rows.push(`<div class="exp-r"><span class="exp-k">watch</span>${esc(st.watch)}</div>`);
+  if(st.result) rows.push(`<div class="exp-r res"><span class="exp-k">result</span>${esc(st.result)}</div>`);
+  if(st.learning) rows.push(`<div class="exp-r"><span class="exp-k">means</span>${esc(st.learning)}</div>`);
+  const verb=st.result?'Update the result':'📈 Post a result';
+  return `<div class="exp">${rows.join('')}<button class="bub-pr" id="bpr">${verb}</button></div>`;
+}
 function showBubble(x,y){
   const b=$('#bubble'); if(sel.type==='global'){b.style.display='none';return;}
-  let title,tag,desc,meta,col,off,detail='';
+  let title,tag,desc,meta,col,off,detail='',exp='';
   if(sel.type==='vision'){title=NAME;tag='the vision';col='#C9A8E0';desc=VISION;meta='';off=58;}
   else if(sel.type==='area'){const a=AREAS.find(x=>x.id===sel.id);title=a.t;tag=(a.h==='left'?'build':'market')+' · area';col=HCOL[a.h];desc=a.desc||'';meta=`${a.steps.length} steps · ${(a.items||[]).length} 15-min items`;detail=(a.gen&&a.gen.detail)||'';off=56;}
-  else {const st=findStep(sel.id),a=findStepArea(sel.id);title=st.t;tag=(a.h==='left'?'build':'market')+' · step';col=PCOL[st.prio];desc=st.desc||'';meta=`${st.hrs}h${st.cost?' · $'+st.cost:''} · ${st.prio}`;detail=(st.gen&&st.gen.detail)||'';off=22;}
+  else {const st=findStep(sel.id),a=findStepArea(sel.id);title=st.t;tag=(a.h==='left'?'build · ship & measure':'market · experiment')+' · step';col=PCOL[st.prio];desc=st.desc||'';meta=`${st.hrs}h${st.cost?' · $'+st.cost:''} · ${st.prio}`;detail=(st.gen&&st.gen.detail)||'';exp=experimentHTML(st,a);off=22;}
   b.style.setProperty('--bcol',col);
   b.innerHTML=`<div class="bub-arrow"></div>
     <div class="bub-head"><span class="bub-tag">${tag}</span><button class="bub-x" id="bx">✕</button></div>
@@ -695,11 +713,17 @@ function showBubble(x,y){
     <div class="bub-dlab">what this is</div>
     <textarea class="bub-desc" id="bdesc" placeholder="Describe what this is and why it matters…">${esc(desc)}</textarea>
     ${detail?`<div class="bub-detail">→ ${esc(detail)}</div>`:''}
+    ${exp}
     <button class="bub-ai" id="bai">✨ ask co-pilot to describe this</button>`;
   b.style.left=x+'px'; b.style.top=(y+off)+'px'; b.style.display='block'; bubbleXY={x,y};
   $('#bx').addEventListener('click',clearFocus);
   $('#bdesc').addEventListener('change',e=>saveDesc(e.target.value));
   $('#bai').addEventListener('click',()=>globalSend(`In one or two sentences, describe what "${title}" is and why it matters for this launch, then save it using the right edit tool (editArea/editStep/editVision desc).`,'…describing'));
+  const pr=$('#bpr'); if(pr) pr.addEventListener('click',()=>{ const st=findStep(sel.id), a=findStepArea(sel.id), market=a&&a.h==='right';
+    globalSend(market
+      ? `I just ran the experiment "${title}". Ask me what happened (what I did + any numbers I saw), then record it with postResult, tell me in one line whether the bet paid off, and design my next 1-2 experiments.`
+      : `"${title}" is built — ask me whether it works as intended and how it went, record it with postResult, then pull out any learnings that could inform my marketing.`,
+      '📈 posting a result…'); });
 }
 
 const linkifyMM=h=>h.replace(/Mind Map/g,'<a class="mmlink" data-mm>Mind Map</a>');
@@ -722,11 +746,16 @@ function suggestions(){
         : {l:'Draft the first thing',p:`For "${a?a.t:''}", draft the very first concrete asset (the landing-page headline, the first DM, the first ad hook) so I can ship it today.`},
     ];
   }
-  const st=findStep(sel.id);
+  const st=findStep(sel.id), sa=findStepArea(sel.id), market=sa&&sa.h==='right';
+  if(market) return [
+    {l:'🎯 Set the bet',p:`Turn "${st?st.t:''}" into a quick experiment: a one-line bet (what I expect to happen) and the one signal to watch. Save them with setExperiment.`},
+    {l:'📈 Post a result',p:`I just ran "${st?st.t:''}". Ask me what happened and any numbers, record it with postResult, tell me in one line if the bet paid off, then design my next 1-2 experiments.`},
+    {l:'First concrete action',p:`What's the very first concrete action to run the experiment "${st?st.t:''}"? Name the exact tool, account, or click.`},
+  ];
   return [
-    {l:'First concrete action',p:`What's the very first concrete action for "${st?st.t:''}"? Name the exact tool, account, or click to start.`},
-    {l:'Break into 15-min steps',p:`Break the step "${st?st.t:''}" into 2-4 fifteen-minute sub-steps and add them as action items.`},
-    {l:'What does this need?',p:`What tools, accounts, or info do I need before I can do "${st?st.t:''}"? List them concretely.`},
+    {l:'📈 Capture the result',p:`"${st?st.t:''}" is a build step — ask me whether it works as intended and how it went, record it with postResult, and pull out learnings that could inform my marketing.`},
+    {l:'Spec for Claude / a dev',p:`Write the precise spec I'd hand Claude or a developer to build "${st?st.t:''}" — concrete and buildable.`},
+    {l:'Break into 15-min steps',p:`Break "${st?st.t:''}" into 2-4 fifteen-minute sub-steps and add them as action items.`},
   ];
 }
 function renderChat(){
@@ -1236,11 +1265,13 @@ Respond with a SINGLE JSON object and nothing else — no markdown fences, no pr
 Use "actions":[] when no edit is needed (e.g. they just asked a question).
 
 Tools (use EXACT ids from MAP STATE; prio = "hi"|"med"|"lo"; hemisphere = "left"=build | "right"=market):
-- addStep {areaId,title,hrs,cost,prio}
-- editStep {stepId,title?,hrs?,cost?,prio?}
+- addStep {areaId,title,hrs,cost,prio,bet?,watch?}   // bet = what you expect to happen; watch = the one signal that proves it (market steps are experiments)
+- editStep {stepId,title?,hrs?,cost?,prio?,bet?,watch?,result?,learning?}
 - toggleStep {stepId,done}
 - deleteStep {stepId}
 - breakdownStep {stepId,parts:[{title,hrs,cost,prio}]}   // replaces the step with these parts
+- setExperiment {stepId,bet,watch}   // turn a market step into an experiment: the bet + the one signal to watch
+- postResult {stepId,result,learning,done?}   // record what happened + what it means; marks the step done
 - addArea {title,hemisphere,desc?}
 - editArea {areaId,title?,sub?,desc?,pruned?}
 - renameArea {areaId,title}
@@ -1256,16 +1287,23 @@ ACTION ITEMS (the 15-minute checklist under each area — small, complete, momen
 
 Rules: only emit actions the founder asked for or that clearly help; prefer 1-4 focused actions; realistic hour/dollar estimates. Action items MUST be doable in ~15 minutes, concrete, and phrased to build momentum (start with a verb). When the founder completes an item, consider adding the next 1-3 items so they never run out of next steps. Always include a short message describing what you did or answering them.
 
+VALIDATION IS THE WHOLE GAME — EVERY STEP IS AN EXPERIMENT. The plan is a sequence of small bets, not a passive to-do list:
+- MARKET steps (right / immaterial) are experiments. Each gets a plain-language "bet" (what you expect to happen) and a "watch" (the ONE signal that tells you if it worked). Set them via setExperiment, or include bet+watch when you addStep. Keep experiments tiny and fast to run.
+- When the founder reports doing something, capture the RESULT with postResult and give a one-line read: did the bet pay off? Frame EVERY result as a win — a "no" is as valuable as a "yes" because it saves time and sharpens aim. There is no failure here, only learning.
+- After a result, immediately DESIGN the next 1-2 experiments (addStep with bet+watch) that build on what was learned, so the founder never faces a blank page.
+- BUILD steps (left / material) are NOT experiments — the proof is the product working as intended. Still capture a result/learning (what worked, how users reacted) with postResult, because those learnings feed the marketing experiments (a feature people love becomes an ad angle).
+KEEP IT STUPID-EASY & HUMAN: say "your bet" / "what to watch" / "what happened" / "what it means" / "next move" — never "hypothesis / KPI / metric" jargon. One clear next move at a time; celebrate every posted result.
+
 BE CONCRETE & REAL-WORLD: name actual tools, accounts, downloads, registries, and filings — e.g. "Sign up for the Apple Developer Program ($99/yr) at developer.apple.com", "Download Xcode from the Mac App Store", "Create a Meta Business Suite account", "Make a GitHub repo". COVER BUSINESS SETUP too, grounded in the founder's location (intake.location): forming an entity (e.g. Florida → file an LLC on Sunbiz at sunbiz.org, ~$125), getting an EIN (free at irs.gov), a registered agent, an operating agreement, the FinCEN BOI report, a business bank account, state sales-tax / reseller registration, and any required licenses or permits — these have real lead time, so surface them early. Use the founder's country/state to name the RIGHT portal and fee; if you don't know their location yet, ASK before giving entity/tax steps (don't assume Florida/Delaware). Frame development work as specific tasks to hand to Claude or a developer (a clear spec, not vague intentions). TONE: warm, energizing, momentum-building — your job is to move the founder out of the fog and into settled decisions and the next obvious 15-minute action. Reduce overwhelm; make the next step feel easy and inevitable.`;
 
 const INTAKE_SYSTEM = SYSTEM + `
 
-INTAKE / INTERVIEW MODE: You are interviewing the founder to understand their product before building a launch plan. Ask 1-2 short, focused questions per turn — cover, over the conversation: what it is, who it's for, the core problem, why them/why now, current build state, where they're based (country/state, so entity/tax/legal steps are right), the goal, and rough time & money budget. Adapt to their answers and never re-ask what you already know. The founder may ask YOU questions — answer them helpfully, then gently continue. Record facts as you learn them with setIntake (and editVision for the vision/name). Do NOT build the full plan until the founder says they're ready (or you clearly have enough) — then emit MANY actions (areas, descs, steps, 15-min items) and tell them to open the Mind Map. Keep messages warm, brief, and human.`;
+INTAKE / INTERVIEW MODE: You are interviewing the founder to understand their product before building a launch plan. Ask 1-2 short, focused questions per turn — cover, over the conversation: what it is, who it's for, the core problem, why them/why now, current build state, where they're based (country/state, so entity/tax/legal steps are right), the goal, and rough time & money budget. Adapt to their answers and never re-ask what you already know. The founder may ask YOU questions — answer them helpfully, then gently continue. Record facts as you learn them with setIntake (and editVision for the vision/name). Do NOT build the full plan until the founder says they're ready (or you clearly have enough) — then emit MANY actions (areas, descs, steps, 15-min items), giving each MARKET step a bet + watch so it's a runnable experiment, and tell them to open the Mind Map. Keep messages warm, brief, and human.`;
 
 function mapState(){return JSON.stringify({vision:VISION,budget:BUDGET,intake:INTAKE,
   schedule:(SCHEDULE.days||[]).map((d,i)=>({day:i+1,focus:d.focus||'',steps:(d.refs||[]).map(r=>findStep(r.id)?.t).filter(Boolean)})).filter(d=>d.steps.length),
   areas:AREAS.map(a=>({id:a.id,title:a.t,hemisphere:a.h,pruned:a.pruned,desc:a.desc||'',
-  steps:a.steps.map(s=>({id:s.id,title:s.t,hrs:s.hrs,cost:s.cost,prio:s.prio,done:s.done,desc:s.desc||''})),
+  steps:a.steps.map(s=>({id:s.id,title:s.t,hrs:s.hrs,cost:s.cost,prio:s.prio,done:s.done,desc:s.desc||'',bet:s.bet||'',watch:s.watch||'',result:s.result||'',learning:s.learning||''})),
   items:(a.items||[]).map(it=>({id:it.id,title:it.t,done:it.done,notes:it.notes||''}))}))});}
 function parseReply(raw){
   let t=(raw||'').trim();
@@ -1307,8 +1345,10 @@ function applyAction(ac){
     case 'editArea':{const ar=AREAS.find(x=>x.id===a.areaId);if(ar){if(a.title!=null)ar.t=a.title;if(a.sub!=null)ar.sub=a.sub;if(a.desc!=null)ar.desc=a.desc;if(a.pruned!=null)ar.pruned=!!a.pruned;flashIds.add(ar.id);return'edited area';}break;}
     case 'renameArea':{const ar=AREAS.find(x=>x.id===a.areaId);if(ar){ar.t=a.title;return'renamed area';}break;}
     case 'pruneArea':{const ar=AREAS.find(x=>x.id===a.areaId);if(ar){ar.pruned=!!a.pruned;if(a.reason)ar.prune=a.reason;return a.pruned?'pruned area':'un-pruned area';}break;}
-    case 'addStep':{const ar=AREAS.find(x=>x.id===a.areaId);if(ar){const id=nid('s');ar.steps.push({id,t:a.title||'New step',hrs:+a.hrs||0,cost:+a.cost||0,prio:a.prio||'med',done:false});flashIds.add(id);return`+ step “${a.title}”`;}break;}
-    case 'editStep':{const st=findStep(a.stepId);if(st){if(a.title!=null)st.t=a.title;if(a.hrs!=null)st.hrs=+a.hrs;if(a.cost!=null)st.cost=+a.cost;if(a.prio)st.prio=a.prio;if(a.desc!=null)st.desc=a.desc;flashIds.add(st.id);return'edited step';}break;}
+    case 'addStep':{const ar=AREAS.find(x=>x.id===a.areaId);if(ar){const id=nid('s');const st={id,t:a.title||'New step',hrs:+a.hrs||0,cost:+a.cost||0,prio:a.prio||'med',done:false};['bet','watch'].forEach(k=>{if(a[k]!=null)st[k]=a[k];});ar.steps.push(st);flashIds.add(id);return`+ step “${a.title}”`;}break;}
+    case 'editStep':{const st=findStep(a.stepId);if(st){if(a.title!=null)st.t=a.title;if(a.hrs!=null)st.hrs=+a.hrs;if(a.cost!=null)st.cost=+a.cost;if(a.prio)st.prio=a.prio;if(a.desc!=null)st.desc=a.desc;['bet','watch','result','learning'].forEach(k=>{if(a[k]!=null)st[k]=a[k];});flashIds.add(st.id);return'edited step';}break;}
+    case 'setExperiment':{const st=findStep(a.stepId);if(st){if(a.bet!=null)st.bet=a.bet;if(a.watch!=null)st.watch=a.watch;flashIds.add(st.id);return'set the bet';}break;}
+    case 'postResult':{const st=findStep(a.stepId);if(st){if(a.result!=null)st.result=a.result;if(a.learning!=null)st.learning=a.learning;st.done=a.done!=null?!!a.done:true;flashIds.add(st.id);return'posted result';}break;}
     case 'toggleStep':{const st=findStep(a.stepId);if(st){st.done=a.done!=null?!!a.done:!st.done;flashIds.add(st.id);return st.done?'✓ done':'reopened';}break;}
     case 'deleteStep':{const ar=findStepArea(a.stepId);if(ar){ar.steps=ar.steps.filter(s=>s.id!==a.stepId);return'deleted step';}break;}
     case 'breakdownStep':{const ar=findStepArea(a.stepId),st=findStep(a.stepId);if(ar&&st&&Array.isArray(a.parts)){const i=ar.steps.indexOf(st);
@@ -1446,7 +1486,10 @@ function exportText(){
     arr.forEach(a=>{ const ag=agg(a);
       D.push(`### ${a.t}${a.pruned?' (pruned)':''} — ${ag.doneN}/${ag.n} steps done, ${ag.openH}h left`);
       if(a.desc) D.push(a.desc);
-      a.steps.forEach(s=>D.push(`- [${s.done?'x':' '}] ${s.t} (${s.hrs}h${s.cost?', $'+s.cost:''}, ${s.prio})${s.desc?' — '+s.desc:''}`));
+      a.steps.forEach(s=>{ let ln=`- [${s.done?'x':' '}] ${s.t} (${s.hrs}h${s.cost?', $'+s.cost:''}, ${s.prio})${s.desc?' — '+s.desc:''}`;
+        if(s.bet) ln+=`\n    bet: ${s.bet}`+(s.watch?` · watch: ${s.watch}`:'');
+        if(s.result) ln+=`\n    result: ${s.result}`+(s.learning?` → ${s.learning}`:'');
+        D.push(ln); });
       const its=(a.items||[]).filter(Boolean);
       if(its.length){ D.push('  15-min items:'); its.forEach(it=>D.push(`  - [${it.done?'x':' '}] ${it.t}${it.notes?' — '+it.notes:''}`)); }
       D.push(''); });
@@ -1476,13 +1519,14 @@ function exportText(){
 
   // ----- assemble the action prompt around the state -----
   const P=[];
-  P.push(`You are my launch co-pilot — an expert product-launch operator who DOES the work, not just advises. Below is the complete current state of my 2-week product launch, exported from my planning tool. I'm bringing it to you to actually get it done.`);
+  P.push(`You are my launch co-pilot — an expert product-launch operator who DOES the work, not just advises. Below is the complete current state of my 2-week product launch, exported from my planning tool. I run this launch as a series of small EXPERIMENTS: every marketing move is a bet I test, I post the result, learn from it, and design the next one. I'm bringing this to you to actually get it done.`);
   P.push('');
   P.push('How to help me:');
   P.push(`- Be concrete and real-world: name the exact tools, URLs, accounts, and costs, and give click-by-click steps.`);
   P.push(`- Where you can, PRODUCE the deliverable itself — the ad copy, the outreach DMs, the landing-page headline, the entity/LLC filing steps, the spec I'd hand a developer (or you) — not vague advice.`);
   P.push(`- Respect my budget (${BUDGET.timeHrs}h and $${BUDGET.money} over 2 weeks). I have limited focus for building but can knock out marketing in parallel — keep both sides moving.`);
   P.push(`- Front-load anything with real-world lead time (account sign-ups, approvals, entity filings, app-store review).`);
+  P.push(`- Treat each MARKET task as an experiment: help me state a one-line bet (what I expect) and the one signal to watch, run it fast and cheap, capture the result, then design the next experiment from what we learn — there's no failure, a "no" just sharpens aim. BUILD tasks aren't experiments (the proof is the product working), but capture results that inform the marketing.`);
   P.push(`- If you need a decision or info I haven't given (location, audience, price), ASK me before assuming.`);
   P.push('');
   P.push('====================  PROJECT STATE  ====================');
@@ -1495,10 +1539,11 @@ function exportText(){
   if(openHi.length){ P.push(''); P.push('Highest-priority open steps:'); uniq(openHi).slice(0,8).forEach(t=>P.push(`- ${t}`)); }
   P.push('');
   P.push('Now do this:');
-  P.push('1. Tell me the single most important thing to do next, and why.');
-  P.push('2. Give me a concrete plan for TODAY — a handful of tasks I can actually finish, mixing build and marketing, with exact steps/links for each.');
-  P.push('3. For each task, produce whatever you can right now (copy, scripts, specs, filing steps) so I can just execute.');
-  P.push('4. Flag anything missing for a real launch that isn’t in my plan yet (legal/entity, payments, analytics, support).');
+  P.push('1. Tell me the single most important EXPERIMENT to run next, and why.');
+  P.push('2. For each open market task, frame it as a fast experiment: the bet (what we expect), the one signal to watch, how to run it cheaply today, and how I’ll capture the result.');
+  P.push('3. Give me a concrete plan for TODAY — a handful of tasks I can actually finish, mixing build and marketing, with exact steps/links — and produce whatever you can right now (copy, scripts, specs, filing steps) so I can just execute.');
+  P.push('4. Tell me how to read each result — what counts as validated vs. a useful "no" — and be ready to design the follow-up experiments once I report back.');
+  P.push('5. Flag anything missing for a real launch that isn’t in my plan yet (legal/entity, payments, analytics, support).');
   P.push('');
   P.push('Start now.');
   return P.join('\n');

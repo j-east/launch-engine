@@ -12,6 +12,7 @@ import { request as httpsRequest } from 'https';
 import { readFile } from 'fs/promises';
 import { extname, join, normalize } from 'path';
 import { fileURLToPath } from 'url';
+import { createHmac, timingSafeEqual } from 'crypto';
 import pg from 'pg';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
@@ -26,6 +27,14 @@ const MIME = { '.html':'text/html', '.js':'text/javascript', '.mjs':'text/javasc
 // a system prompt we can't hold constant (methodology §2). Key lives ONLY in env, never the repo.
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || null;
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'anthropic/claude-sonnet-4.5';
+
+// Simple shared-password gate. If APP_PASSWORD is unset the app stays OPEN (dev / pre-rollout).
+// Cookie holds a token derived from the password, so no server-side session store is needed.
+const APP_PASSWORD = process.env.APP_PASSWORD || null;
+const AUTH_TOKEN = APP_PASSWORD ? createHmac('sha256', 'launch-engine-gate').update(APP_PASSWORD).digest('hex') : null;
+const safeEq = (a, b) => { try { const x = Buffer.from(String(a)), y = Buffer.from(String(b)); return x.length === y.length && timingSafeEqual(x, y); } catch { return false; } };
+const parseCookies = req => Object.fromEntries((req.headers.cookie || '').split(';').map(p => { const i = p.indexOf('='); return i < 0 ? null : [p.slice(0, i).trim(), decodeURIComponent(p.slice(i + 1).trim())]; }).filter(Boolean));
+const isAuthed = req => !APP_PASSWORD || safeEq(parseCookies(req).le_auth, AUTH_TOKEN);
 
 const DB_URL = process.env.DATABASE_URL ?? 'postgres://postgres:postgres@localhost:5433/launch_engine';
 const db = new pg.Pool({ connectionString: DB_URL, max: 4 });
@@ -110,6 +119,20 @@ function proxyOpenRouter(reqBody, res) {
 createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
 
+  // ---- auth: login sets the cookie; everything else under /api requires it ----
+  if (req.method === 'POST' && url.pathname === '/api/login') {
+    try {
+      const { password } = JSON.parse(await readBody(req));
+      if (!APP_PASSWORD) return sendJSON(res, 200, { ok: true }); // gate disabled
+      if (!safeEq(password, APP_PASSWORD)) return sendJSON(res, 401, { error: 'wrong password' });
+      res.writeHead(200, { 'Content-Type':'application/json',
+        'Set-Cookie': `le_auth=${AUTH_TOKEN}; HttpOnly; Path=/; Max-Age=${60*60*24*30}; SameSite=Lax` });
+      return res.end(JSON.stringify({ ok: true }));
+    } catch (e) { return sendJSON(res, 400, { error: e.message }); }
+  }
+  if (url.pathname.startsWith('/api/') && !isAuthed(req)) return sendJSON(res, 401, { error: 'auth required' });
+  if (req.method === 'GET' && url.pathname === '/api/me') return sendJSON(res, 200, { ok: true, gated: !!APP_PASSWORD });
+
   // ---- Claude proxy (co-pilot, via Open Shannon sidecar) ----
   if (req.method === 'POST' && url.pathname === '/api/claude') {
     try { proxyClaude(await readBody(req), res); }
@@ -176,6 +199,7 @@ createServer(async (req, res) => {
   console.log(`Launch Engine → http://localhost:${PORT}`);
   console.log(`  proxying /api/claude → ${SIDECAR}/claude${SECRET ? ' (auth on)' : ''}`);
   console.log(`  proxying /api/raw    → openrouter.ai (${OPENROUTER_KEY ? `key set, model ${OPENROUTER_MODEL}` : 'NO KEY — set OPENROUTER_API_KEY'})`);
+  console.log(`  password gate: ${APP_PASSWORD ? 'ON' : 'OFF (set APP_PASSWORD to enable)'}`);
   try { await ensureDb(); console.log('  postgres → ready (db + table ensured)'); }
   catch (e) { console.log(`  postgres → NOT ready: ${e.message}`); }
 });

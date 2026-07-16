@@ -353,6 +353,57 @@
   .valbar{height:6px;border-radius:4px;background:var(--line);margin-top:5px;overflow:hidden;position:relative;}
   .valbar i{position:absolute;top:0;bottom:0;display:block;}
   .rescard .ract{margin-top:11px;display:flex;gap:9px;flex-wrap:wrap;}
+  /* ── Ad Lab ── */
+  .ad-cfg{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 4px;}
+  .ad-cfg label{font-family:var(--mono);font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:var(--faint);}
+  .ad-cfg select,.ad-cfg input{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 9px;color:var(--ink);font-family:inherit;font-size:13px;outline:none;}
+  .ad-cfg select:focus,.ad-cfg input:focus{border-color:var(--idea);}
+  .adgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:11px;}
+  .adcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 13px;position:relative;}
+  .adcard.off{opacity:.42;}
+  .adcard .aon{position:absolute;top:10px;right:11px;cursor:pointer;font-size:13px;color:var(--ink-2);background:none;border:none;}
+  .adcard .angle{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--idea);margin-bottom:7px;}
+  .fbads{border:1px solid var(--line);border-radius:9px;background:var(--bg);overflow:hidden;margin-bottom:7px;}
+  .fbads .prim{padding:8px 10px;font-size:12.5px;color:var(--ink);line-height:1.45;border-bottom:1px solid var(--line);}
+  .fbads .foot{padding:7px 10px;background:var(--panel-2);display:flex;align-items:center;gap:9px;}
+  .fbads .foot .u{flex:1;font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .fbads .foot .hl{font-size:12.5px;font-weight:700;color:var(--ink);line-height:1.25;}
+  .fbads .foot .ds{font-size:11px;color:var(--ink-2);}
+  .fbads .cta{flex:none;font-size:10.5px;font-weight:600;background:var(--line);color:var(--ink);border-radius:6px;padding:5px 9px;white-space:nowrap;}
+  .adcard textarea,.adcard input.af{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:5px 8px;color:var(--ink-2);font-family:inherit;font-size:12px;resize:vertical;outline:none;margin-top:5px;line-height:1.4;}
+  .adcard textarea:focus,.adcard input.af:focus{border-color:var(--idea);color:var(--ink);}
+  .adcard .afl{font-family:var(--mono);font-size:9px;letter-spacing:.3px;text-transform:uppercase;color:var(--faint);margin-top:6px;display:block;}
+  .fchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;align-items:center;}
+  .fchip{font-size:12px;border:1px solid var(--line);border-radius:20px;padding:5px 11px;cursor:pointer;background:var(--bg);color:var(--ink-2);user-select:none;}
+  .fchip.on{background:rgba(201,168,224,.14);border-color:var(--idea);color:var(--ink);}
+  .fchip.add{border-style:dashed;color:var(--faint);}
+  .geo-in{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:5px 11px;color:var(--ink);font-size:12px;outline:none;min-width:150px;}
+  .matrix{background:linear-gradient(150deg,rgba(120,180,220,.08),rgba(201,168,224,.05));border:1px solid var(--line);border-radius:13px;padding:15px 17px;margin-top:14px;}
+  .matrix .big{font-size:26px;font-weight:700;font-family:var(--mono);}
+  .matrix .dims{color:var(--ink-2);font-size:13px;margin-top:2px;}
+  .pstat{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:13px;}
+  .pstat .b{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 11px;}
+  .pstat .b .l{font-family:var(--mono);font-size:9.5px;letter-spacing:.3px;text-transform:uppercase;color:var(--faint);}
+  .pstat .b .v{font-size:18px;font-weight:700;margin-top:2px;}
+  .pstat .b .v small{font-size:11px;color:var(--ink-2);font-weight:400;}
+  .powrow{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;}
+  .powrow .pf{display:flex;flex-direction:column;gap:3px;}
+  .powrow .pf label{font-family:var(--mono);font-size:9.5px;letter-spacing:.3px;text-transform:uppercase;color:var(--faint);}
+  .powrow .pf input{width:92px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 8px;color:var(--ink);font-size:13px;outline:none;}
+  .powrow .pf input:focus{border-color:var(--idea);}
+  .warn{margin-top:10px;font-size:12.5px;color:#E8C08A;background:rgba(220,170,110,.08);border:1px solid rgba(220,170,110,.25);border-radius:8px;padding:7px 11px;}
+  .runbook{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:13px 15px;margin-top:11px;white-space:pre-wrap;line-height:1.65;max-height:420px;overflow-y:auto;}
+  .runbook.hidden{display:none;}
+  /* password gate */
+  .gate{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:radial-gradient(1200px 600px at 50% -10%,rgba(201,168,224,.10),transparent),var(--bg);}
+  .gatebox{width:min(340px,88vw);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px 24px;display:flex;flex-direction:column;gap:12px;box-shadow:0 30px 90px -30px #000;}
+  .gatebox .gkick{font-size:17px;font-weight:700;letter-spacing:.3px;}
+  .gatebox .gsub{color:var(--ink-2);font-size:13px;margin-top:-6px;}
+  .gatebox input{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--ink);font-family:inherit;font-size:14px;outline:none;}
+  .gatebox input:focus{border-color:var(--idea);}
+  .gatebox button{background:var(--idea);color:#1a1220;border:none;border-radius:9px;padding:10px 12px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;}
+  .gatebox button:disabled{opacity:.6;cursor:default;}
+  .gatebox .gerr{color:#E89090;font-size:12.5px;min-height:16px;}
   /* export-to-AI modal */
   .modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(8,9,11,.6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
   .modal.on{display:flex;}
@@ -385,6 +436,15 @@
 </style>
 </head>
 <body>
+  <div class="gate" id="gate" style="display:none">
+    <form class="gatebox" id="gateform">
+      <div class="gkick">Launch Engine</div>
+      <div class="gsub">Enter the password to continue.</div>
+      <input type="password" id="gatepw" autocomplete="current-password" placeholder="Password" autofocus>
+      <button type="submit" id="gatebtn">Unlock</button>
+      <div class="gerr" id="gateerr"></div>
+    </form>
+  </div>
   <div class="top">
     <span class="kick">Launch Engine</span>
     <select id="cpick" class="cpick" title="Switch concept"></select>
@@ -498,11 +558,24 @@ function defLab(){ return {
   ],
   runs:[]              // [{phrase, ts, personas:[{id,name,role, prose, valence,associations,resistance,recallVerbatim,recallFeeling,backfire,note}], verdict:{score,why,risk,backfire}}]
 };}
+let ADS=defAds();      // Ad Lab: Meta ad drafts + a designed factorial experiment (Creative × Geo × Age × …)
+const AGE_BRACKETS=['18-24','25-34','35-44','45-54','55-64','65+'];
+const AD_OBJECTIVES=['Awareness','Traffic','Engagement','Leads','Sales'];
+const AD_CTAS=['LEARN_MORE','SIGN_UP','SHOP_NOW','GET_OFFER','SUBSCRIBE','CONTACT_US','DOWNLOAD','BOOK_NOW','NO_BUTTON'];
+function defAds(){ return {
+  objective:'Traffic',
+  url:'',
+  creatives:[],        // [{id,on,primary,headline,description,cta,angle}]
+  geos:[],             // ['Jacksonville, FL', …]  — location factor levels
+  ages:['25-34','35-44','45-54'],
+  custom:{name:'',levels:[]},   // optional 3rd factor, e.g. {name:'Placement', levels:['Feed','Reels']}
+  priors:{cpm:12, baseCtr:1.0, mde:0.4, budgetPerCellDay:8}  // cpm $, baseCtr & mde in %, budget $/cell/day
+};}
 let flashIds=new Set();// ids of nodes/items just created or edited, to flash on next render
 let panSuppress=false; // true right after a drag-pan, to swallow the trailing click
 let bubbleXY=null;     // last node-bubble position (to refresh after edits)
 let stage='mindmap';
-const STAGES=[['intake','1 · Intake'],['invest','2 · Invest & Simulate'],['mindmap','3 · Mind Map'],['schedule','4 · Schedule'],['checkin','5 · Check-ins'],['report','6 · Report'],['phraselab','✷ Phrase Lab']];
+const STAGES=[['intake','1 · Intake'],['invest','2 · Invest & Simulate'],['mindmap','3 · Mind Map'],['schedule','4 · Schedule'],['checkin','5 · Check-ins'],['report','6 · Report'],['phraselab','✷ Phrase Lab'],['adlab','◈ Ad Lab']];
 // URL ↔ tab: slug derived from the tab label so it always matches (e.g. "2 · Invest & Simulate" → "invest-simulate")
 const stageSlug=id=>{const e=STAGES.find(s=>s[0]===id);return e?e[1].replace(/^[^·]*·\s*/,'').trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''):id;};
 const slugStage=sl=>{const e=STAGES.find(s=>stageSlug(s[0])===sl);return e?e[0]:null;};
@@ -927,6 +1000,7 @@ function applyStage(){
   if(stage==='invest') return renderInvest(stub);
   if(stage==='schedule') return renderSchedule(stub);
   if(stage==='phraselab') return renderPhraseLab(stub);
+  if(stage==='adlab') return renderAdLab(stub);
   const N={checkin:'Daily check-ins',report:'Final report'};
   stub.innerHTML=`<div class="stubcard"><div class="stubn">${N[stage]}</div><p>Coming next. Intake, Invest and the Mind Map are working — these later stages will consume that plan.</p></div>`;
 }
@@ -1679,7 +1753,178 @@ function renderPhraseLab(stub){
   $('#lab_seed').addEventListener('click',seedPersonas);
   renderLabResults();
 }
-function serialize(){ return {name:NAME, vision:VISION, areas:AREAS, intake:INTAKE, budget:BUDGET, schedule:SCHEDULE, sim:{priors:SIM.priors,alloc:SIM.alloc}, chats:CHATS, lab:LAB}; }
+// ---------- Ad Lab: draft Meta ads + design a factorial experiment (Creative × Geo × Age × …) ----------
+// The Meta hierarchy IS an experiment: Campaign = objective, Ad Set = a cohort CELL (geo/age/…),
+// Ad = the creative. So a clean test = a factorial grid; each cell is its own ad set with an equal,
+// controlled budget (CBO OFF), run simultaneously, sized so an ANOVA can actually detect an effect.
+const ctaLabel=c=>c==='NO_BUTTON'?'No button':(c||'LEARN_MORE').toLowerCase().replace(/_/g,' ').replace(/\b\w/g,m=>m.toUpperCase());
+const fmtN=n=>Math.round(n).toLocaleString();
+function adCells(){
+  const cr=ADS.creatives.filter(x=>x.on!==false);
+  const geos=ADS.geos.length?ADS.geos:['(all)'], ages=ADS.ages.length?ADS.ages:['(all)'];
+  const cus=(ADS.custom.name&&ADS.custom.levels.length)?ADS.custom.levels:[null];
+  const cells=[]; cr.forEach(c=>geos.forEach(g=>ages.forEach(a=>cus.forEach(cu=>cells.push({cr:c,g,a,cu}))))); return cells;
+}
+// two-proportion sample size (per cell) for 80% power, α=.05 two-sided → impressions needed per cell
+function adPower(){
+  const p=ADS.priors, p1=Math.max(.0001,Math.min(.5,p.baseCtr/100)), delta=Math.max(.0001,p.mde/100), p2=Math.min(.9,p1+delta);
+  const nCell=Math.ceil(7.849*(p1*(1-p1)+p2*(1-p2))/(delta*delta));
+  const cells=adCells().length, totalImp=nCell*cells, cpm=Math.max(.5,p.cpm);
+  const perCellCost=nCell/1000*cpm, budget=totalImp/1000*cpm;
+  const days=p.budgetPerCellDay>0?Math.max(1,Math.ceil(perCellCost/p.budgetPerCellDay)):0;
+  return {nCell,cells,totalImp,perCellCost,budget,days};
+}
+async function draftAds(){
+  const btn=$('#ad_draft'); if(btn){btn.disabled=true;btn.textContent='✨ Drafting…';}
+  const wins=(LAB.runs||[]).slice(0,5).map(r=>`"${r.phrase}" (resonance ${r.verdict&&r.verdict.score!=null?r.verdict.score:'?'})`).join('\n');
+  const sys="You are a senior Meta (Facebook/Instagram) performance copywriter. Write scroll-stopping ad variants that are DISTINCT angles (not reworded twins) so they're genuinely worth A/B testing. Respect Meta's practical limits: primary text ideally under ~125 chars, headline under ~40, description under ~30. Ground everything in the real product; never invent claims or features. Each variant picks one clear feeling and one CTA.";
+  const prompt=`${labContext()}\nOBJECTIVE: ${ADS.objective}\nDESTINATION: ${ADS.url||'(a landing page)'}\n${wins?`\nPhrase Lab winners to build on (favour these lines as headlines / hooks):\n${wins}\n`:''}\nWrite 4 ad variants. Output ONLY a JSON array of objects: {"angle":"2-4 word label","primary":"...","headline":"...","description":"...","cta":"ONE of ${AD_CTAS.join('|')}"}.`;
+  const arr=pluckArray(await askRaw(sys,prompt));
+  if(Array.isArray(arr)) arr.forEach(a=>ADS.creatives.push({id:nid('ad'),on:true,
+    primary:(''+(a.primary||'')).trim(),headline:(''+(a.headline||'')).trim(),description:(''+(a.description||'')).trim(),
+    cta:AD_CTAS.includes(a.cta)?a.cta:'LEARN_MORE',angle:(''+(a.angle||'')).trim()}));
+  touch(); renderAdLab($('#stub'));
+}
+function buildRunbook(){
+  const cells=adCells(), pw=adPower(), p=ADS.priors, opt=ADS.objective==='Sales'?'Conversions':ADS.objective==='Leads'?'Leads':ADS.objective==='Engagement'?'Engagement':ADS.objective==='Awareness'?'Reach':'Link clicks';
+  const L=[];
+  L.push(`META ADS — RUNBOOK   (${cells.length} ad sets · objective: ${ADS.objective})`);
+  L.push(`Built from your map + Phrase Lab. Launch all cells at once; don't edit mid-flight — every change restarts Meta's learning phase and pollutes the test.`);
+  L.push('');
+  L.push(`STEP 1 · CAMPAIGN`);
+  L.push(`• Ads Manager → Create → Objective: ${ADS.objective}`);
+  L.push(`• Campaign budget optimization: OFF  ← critical. This keeps every cell's budget equal so you're comparing creatives, not Meta's auto-spend.`);
+  L.push(`• Name: "${(NAME||'Launch')} — factorial test"`);
+  L.push('');
+  L.push(`STEP 2 · AD SETS   (one per cell · $${p.budgetPerCellDay}/day each · run ~${pw.days} day${pw.days===1?'':'s'})`);
+  cells.forEach((c,i)=>{ const nm=[c.cr.headline||('creative '+(ADS.creatives.indexOf(c.cr)+1)),c.g,c.a,c.cu].filter(x=>x&&x!=='(all)').join(' | ');
+    L.push(`  ${String(i+1).padStart(2,'0')}. ${trunc(nm,74)}`);
+    L.push(`      Location: ${c.g==='(all)'?'(your default)':c.g}   Age: ${c.a==='(all)'?'18–65+':c.a}${c.cu?`   ${ADS.custom.name}: ${c.cu}`:''}`);
+    L.push(`      Daily budget: $${p.budgetPerCellDay}   Optimization: ${opt}   Placements: Advantage+ (auto)`);
+  });
+  L.push('');
+  L.push(`STEP 3 · ADS   (drop the matching creative into each ad set)`);
+  ADS.creatives.filter(c=>c.on!==false).forEach((c,i)=>{
+    L.push(`  Creative ${i+1}${c.angle?' — '+c.angle:''}`);
+    L.push(`     Primary text:  ${c.primary||''}`);
+    L.push(`     Headline:      ${c.headline||''}`);
+    L.push(`     Description:   ${c.description||''}`);
+    L.push(`     CTA button:    ${ctaLabel(c.cta)}      URL: ${ADS.url||'(your landing page)'}`);
+  });
+  L.push('');
+  L.push(`STEP 4 · WHY THESE NUMBERS  (power)`);
+  L.push(`• To detect a CTR lift of ${p.mde}% over a ${p.baseCtr}% baseline at 80% power (α=.05), each cell needs ~${fmtN(pw.nCell)} impressions.`);
+  L.push(`• At ~$${p.cpm} CPM that's ~$${fmtN(pw.perCellCost)}/cell → ~$${fmtN(pw.budget)} total across ${cells.length} cells.`);
+  L.push(`• At $${p.budgetPerCellDay}/cell/day, run ~${pw.days} day${pw.days===1?'':'s'} so every cell reaches power before you read results. Under-powering it is why most people can't tell what worked.`);
+  L.push('');
+  L.push(`STEP 5 · EXPORT FOR THE ANOVA READ`);
+  L.push(`• After the run: Ads Manager → Columns → add Impressions, Clicks (all), CTR, CPC, Results, Cost per result.`);
+  L.push(`• Breakdown → By Ad Set → Export → CSV.`);
+  L.push(`• Paste that CSV into the Ad Lab analysis step (next slice) — it runs the ANOVA and tells you which factor actually moved the needle, and which interactions matter.`);
+  return L.join('\n');
+}
+function renderAdMatrix(){
+  const box=$('#ad_matrix'); if(!box) return;
+  const cells=adCells(), pw=adPower(), p=ADS.priors, nCr=ADS.creatives.filter(c=>c.on!==false).length;
+  const dims=[`${nCr||0} creative${nCr===1?'':'s'}`,`${ADS.geos.length||1} geo${ADS.geos.length===1?'':'s'}`,`${ADS.ages.length||1} age${ADS.ages.length===1?'':'s'}`];
+  if(ADS.custom.name&&ADS.custom.levels.length) dims.push(`${ADS.custom.levels.length} ${ADS.custom.name.toLowerCase()}`);
+  const big=cells.length>24;
+  box.innerHTML=`<div class="matrix">
+    <div class="big">${cells.length} cell${cells.length===1?'':'s'}</div>
+    <div class="dims">${dims.join(' × ')} — each becomes one ad set (one creative in one cohort)</div>
+    <div class="pstat">
+      <div class="b"><div class="l">Impressions / cell</div><div class="v">${fmtN(pw.nCell)}</div></div>
+      <div class="b"><div class="l">Total budget</div><div class="v">$${fmtN(pw.budget)}</div></div>
+      <div class="b"><div class="l">Per cell</div><div class="v">$${fmtN(pw.perCellCost)}</div></div>
+      <div class="b"><div class="l">Run time</div><div class="v">${pw.days}<small> day${pw.days===1?'':'s'} @ $${p.budgetPerCellDay}/cell/day</small></div></div>
+    </div>
+    <div class="powrow">
+      <div class="pf"><label>CPM ($)</label><input type="number" id="pp_cpm" step="0.5" value="${p.cpm}"></div>
+      <div class="pf"><label>Baseline CTR %</label><input type="number" id="pp_ctr" step="0.1" value="${p.baseCtr}"></div>
+      <div class="pf"><label>Detect Δ CTR %</label><input type="number" id="pp_mde" step="0.1" value="${p.mde}"></div>
+      <div class="pf"><label>$/cell/day</label><input type="number" id="pp_bud" step="1" value="${p.budgetPerCellDay}"></div>
+    </div>
+    <div class="dims" style="margin-top:8px;font-size:12px">Powered to detect a <b>${p.mde}%</b> absolute CTR lift over a <b>${p.baseCtr}%</b> baseline. Tighten Δ to catch smaller effects (costs more); loosen it to spend less.</div>
+    ${big?`<div class="warn">⚠ ${cells.length} cells is a lot — that's $${fmtN(pw.budget)} to power fully. Consider fewer geos/ages, or test creative first and cohorts second.</div>`:''}
+    <div style="margin-top:13px;display:flex;gap:9px;flex-wrap:wrap">
+      <button class="genbtn" id="ad_runbtn">📋 Generate Ads Manager runbook</button>
+      <button class="tool" id="ad_copy" style="display:none">⧉ Copy</button>
+    </div>
+    <div class="runbook hidden" id="ad_runbook"></div>
+  </div>`;
+  const bindP=(id,key)=>{ const el=$(id); el.addEventListener('input',()=>{ const v=parseFloat(el.value); if(isFinite(v)){ ADS.priors[key]=v; touch(); renderAdMatrix(); const f=$(id); if(f){ f.focus(); const n=f.value.length; try{f.setSelectionRange(n,n);}catch(e){} } } }); };
+  bindP('#pp_cpm','cpm'); bindP('#pp_ctr','baseCtr'); bindP('#pp_mde','mde'); bindP('#pp_bud','budgetPerCellDay');
+  $('#ad_runbtn').addEventListener('click',()=>{ const rb=$('#ad_runbook'); rb.textContent=buildRunbook(); rb.classList.remove('hidden'); $('#ad_copy').style.display=''; });
+  $('#ad_copy').addEventListener('click',async()=>{ const t=$('#ad_runbook').textContent;
+    try{ await navigator.clipboard.writeText(t); $('#ad_copy').textContent='✓ Copied'; setTimeout(()=>$('#ad_copy').textContent='⧉ Copy',1400);}catch(e){ const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove(); $('#ad_copy').textContent='✓ Copied'; setTimeout(()=>$('#ad_copy').textContent='⧉ Copy',1400);} });
+}
+function renderAdLab(stub){
+  if(!ADS.url && INTAKE.url) ADS.url=INTAKE.url;
+  if(!ADS.geos.length && INTAKE.location) ADS.geos=[INTAKE.location];
+  const creatives=ADS.creatives.map((c,i)=>`
+    <div class="adcard ${c.on===false?'off':''}" data-ci="${i}">
+      <button class="aon" data-toggle="${i}">${c.on===false?'☐':'☑'}</button>
+      <div class="angle">${esc(c.angle||('variant '+(i+1)))}</div>
+      <div class="fbads">
+        <div class="prim">${esc(c.primary||'—')}</div>
+        <div class="foot"><div style="flex:1;min-width:0"><div class="u">${esc((ADS.url||'your-site.com').replace(/^https?:\/\//,''))}</div><div class="hl">${esc(c.headline||'—')}</div>${c.description?`<div class="ds">${esc(c.description)}</div>`:''}</div><div class="cta">${ctaLabel(c.cta)}</div></div>
+      </div>
+      <span class="afl">primary text</span><textarea data-cf="primary" rows="2">${esc(c.primary||'')}</textarea>
+      <span class="afl">headline</span><input class="af" data-cf="headline" value="${esc(c.headline||'')}">
+      <span class="afl">description</span><input class="af" data-cf="description" value="${esc(c.description||'')}">
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-top:6px">
+        <div style="flex:1"><span class="afl">cta</span><select class="af" data-cf="cta">${AD_CTAS.map(x=>`<option value="${x}" ${x===c.cta?'selected':''}>${ctaLabel(x)}</option>`).join('')}</select></div>
+        <button class="tool" data-del="${i}" style="border-color:rgba(220,110,110,.3);color:#E89090">remove</button>
+      </div>
+    </div>`).join('');
+  const ageChips=AGE_BRACKETS.map(a=>`<span class="fchip ${ADS.ages.includes(a)?'on':''}" data-age="${a}">${a}</span>`).join('');
+  const geoChips=ADS.geos.map((g,i)=>`<span class="fchip on" data-geo="${i}">${esc(g)} ✕</span>`).join('')+`<input class="geo-in" id="ad_geo" placeholder="add city/region + Enter">`;
+  const cusChips=(ADS.custom.levels||[]).map((l,i)=>`<span class="fchip on" data-cus="${i}">${esc(l)} ✕</span>`).join('')+`<input class="geo-in" id="ad_cus" placeholder="add level + Enter" style="min-width:120px">`;
+  stub.innerHTML=`<div class="pane" style="max-width:960px">
+    <h2>Ad Lab — draft Meta ads, then design the experiment that tells you what worked</h2>
+    <div class="lab-hero">
+      <h3>The Meta hierarchy <em>is</em> an experiment — that's the whole unlock.</h3>
+      <p><b>Campaign</b> = your objective. <b>Ad set</b> = a cohort <b>cell</b> (geo, age, interest) — your experimental factors. <b>Ad</b> = the creative — your Phrase-Lab-tested lines. We turn winners into ad drafts, cross them with the cohorts you care about into a factorial grid, and size each cell so the difference is real, not noise. The reason ad performance feels like a mystery is Meta's auto-budget quietly picks winners for you — so we run equal-budget cells (CBO off) and read them with an ANOVA. Set it up here; the results read comes next.</p>
+      <span class="iso-badge" style="color:#9BC7E8;border-color:rgba(120,180,220,.3);background:rgba(120,180,220,.08)">◈ designed experiment · equal-budget cells · powered to detect a real effect</span>
+    </div>
+
+    <div class="ad-cfg">
+      <div><label>Objective</label><br><select id="ad_obj">${AD_OBJECTIVES.map(o=>`<option ${o===ADS.objective?'selected':''}>${o}</option>`).join('')}</select></div>
+      <div style="flex:1;min-width:220px"><label>Destination URL</label><br><input id="ad_url" style="width:100%" placeholder="https://…" value="${esc(ADS.url||'')}"></div>
+    </div>
+
+    <div class="lab-sec">Creatives<span class="ln"></span><button class="tool" id="ad_draft">✨ Draft ads from project + Phrase Lab</button><button class="tool" id="ad_blank">＋ blank</button></div>
+    ${ADS.creatives.length?`<div class="adgrid">${creatives}</div>`:`<p class="lead" style="margin:0">No creatives yet. Draft a set from your project (it favours your top Phrase Lab lines), or add a blank one.</p>`}
+
+    <div class="lab-sec">Cohort factors<span class="ln"></span></div>
+    <p class="lead" style="margin:0 0 8px">Each factor multiplies the cell count. Start narrow — creative × one or two cohorts — then expand.</p>
+    <div style="margin-bottom:10px"><label class="afl">Geography</label><div class="fchips" id="geo_wrap">${geoChips}</div></div>
+    <div style="margin-bottom:10px"><label class="afl">Age brackets</label><div class="fchips">${ageChips}</div></div>
+    <div><label class="afl">Custom factor (optional) — e.g. Placement, Gender, Interest</label>
+      <div class="fchips"><input class="geo-in" id="ad_cusname" placeholder="factor name" style="min-width:120px" value="${esc(ADS.custom.name||'')}"><span style="color:var(--faint)">:</span>${cusChips}</div></div>
+
+    <div id="ad_matrix"></div>
+  </div>`;
+
+  $('#ad_obj').addEventListener('change',e=>{ADS.objective=e.target.value;touch();renderAdMatrix();});
+  $('#ad_url').addEventListener('input',e=>{ADS.url=e.target.value.trim();touch();});
+  $('#ad_url').addEventListener('change',()=>renderAdLab(stub));
+  $('#ad_draft').addEventListener('click',draftAds);
+  $('#ad_blank').addEventListener('click',()=>{ADS.creatives.push({id:nid('ad'),on:true,primary:'',headline:'',description:'',cta:'LEARN_MORE',angle:''});touch();renderAdLab(stub);});
+  stub.querySelectorAll('.adcard').forEach(card=>{ const i=+card.dataset.ci;
+    card.querySelectorAll('[data-cf]').forEach(el=>{ el.addEventListener('input',()=>{ADS.creatives[i][el.dataset.cf]=el.value;touch();}); el.addEventListener('change',()=>renderAdLab(stub)); }); });
+  stub.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.toggle;ADS.creatives[i].on=ADS.creatives[i].on===false;touch();renderAdLab(stub);}));
+  stub.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{ADS.creatives.splice(+b.dataset.del,1);touch();renderAdLab(stub);}));
+  stub.querySelectorAll('[data-age]').forEach(c=>c.addEventListener('click',()=>{const a=c.dataset.age;const i=ADS.ages.indexOf(a);if(i>=0)ADS.ages.splice(i,1);else ADS.ages.push(a);touch();renderAdLab(stub);}));
+  stub.querySelectorAll('[data-geo]').forEach(c=>c.addEventListener('click',()=>{ADS.geos.splice(+c.dataset.geo,1);touch();renderAdLab(stub);}));
+  const geoIn=$('#ad_geo'); if(geoIn)geoIn.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.value.trim()){ADS.geos.push(e.target.value.trim());touch();renderAdLab(stub);}});
+  stub.querySelectorAll('[data-cus]').forEach(c=>c.addEventListener('click',()=>{ADS.custom.levels.splice(+c.dataset.cus,1);touch();renderAdLab(stub);}));
+  const cusIn=$('#ad_cus'); if(cusIn)cusIn.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.value.trim()){ADS.custom.levels.push(e.target.value.trim());touch();renderAdLab(stub);}});
+  $('#ad_cusname').addEventListener('input',e=>{ADS.custom.name=e.target.value;touch();});
+  $('#ad_cusname').addEventListener('change',()=>renderAdMatrix());
+  renderAdMatrix();
+}
+function serialize(){ return {name:NAME, vision:VISION, areas:AREAS, intake:INTAKE, budget:BUDGET, schedule:SCHEDULE, sim:{priors:SIM.priors,alloc:SIM.alloc}, chats:CHATS, lab:LAB, ads:ADS}; }
 function save(now){
   clearTimeout(saveT);
   const doit=async()=>{ try{ await fetch('/api/concept',{method:'PUT',headers:{'Content-Type':'application/json'},
@@ -1695,6 +1940,7 @@ function applyConcept(d){ NAME=d.name||'Untitled'; VISION=d.vision||''; AREAS=Ar
   if(!SIM.alloc.price)SIM.alloc.price=SIM.priors.price.base; SIM_MATRIX=null;
   CHATS=(d.chats&&typeof d.chats==='object')?d.chats:{};
   LAB=d.lab&&Array.isArray(d.lab.personas)?Object.assign(defLab(),d.lab):defLab();
+  ADS=d.ads&&Array.isArray(d.ads.creatives)?Object.assign(defAds(),d.ads,{priors:Object.assign(defAds().priors,d.ads.priors||{}),custom:Object.assign({name:'',levels:[]},d.ads.custom||{})}):defAds();
   flashIds=new Set(); expandedArea=null;
   sel={type:'global'}; bubbleXY=null; }
 async function loadConcept(){
@@ -1883,7 +2129,21 @@ function initDotField(){
   _dfResize=rebuild; rebuild();   // initial static field
 }
 
+// simple shared-password gate: /api/me returns 200 only when authed (or when no password is set)
+async function ensureAuth(){
+  try{ const r=await fetch('/api/me'); if(r.ok) return true; }catch(e){ return true; } // server unreachable → let the app try
+  const gate=$('#gate'); gate.style.display='flex';
+  return new Promise(resolve=>{
+    $('#gateform').addEventListener('submit',async e=>{ e.preventDefault();
+      const btn=$('#gatebtn'), err=$('#gateerr'); btn.disabled=true; err.textContent='';
+      try{ const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:$('#gatepw').value})});
+        if(r.ok){ gate.style.display='none'; resolve(true); } else { err.textContent='Wrong password.'; btn.disabled=false; $('#gatepw').select(); } }
+      catch(x){ err.textContent='Could not reach the server.'; btn.disabled=false; }
+    });
+  });
+}
 async function boot(){
+  if(!await ensureAuth()) return;
   initDotField();
   $('#auto').addEventListener('change',e=>auto=e.target.checked);
   $('#map').addEventListener('click',e=>{ if(panSuppress){panSuppress=false;return;} if(!e.target.closest('.node')) clearFocus(); });

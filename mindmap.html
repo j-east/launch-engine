@@ -134,6 +134,20 @@
   .bub-pr{margin-top:4px;width:calc(100% - 0px);border:1px solid var(--done);background:rgba(95,190,156,.08);color:var(--done);
     font-family:var(--mono);font-size:11.5px;font-weight:700;padding:8px;border-radius:8px;cursor:pointer;}
   .bub-pr:hover{background:rgba(95,190,156,.16);}
+  /* expanded-area inline card (rendered in the map via foreignObject) */
+  .acard{height:100%;box-sizing:border-box;display:flex;flex-direction:column;padding:9px 12px;font-family:'Hanken Grotesk',sans-serif;color:var(--ink);overflow:hidden;}
+  .ac-head{display:flex;align-items:center;justify-content:space-between;}
+  .ac-tag{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ac,#9A9);}
+  .ac-x{background:none;border:none;color:var(--faint);font-size:12px;cursor:pointer;line-height:1;padding:0 2px;}
+  .ac-x:hover{color:var(--ink);}
+  .ac-title{font-family:'Fraunces',serif;font-size:15px;margin-top:3px;line-height:1.15;}
+  .ac-meta{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:3px;}
+  .ac-lab{font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:8px 0 3px;}
+  .ac-desc{flex:1;min-height:38px;background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:7px 9px;color:var(--ink-2);font-family:inherit;font-size:12px;line-height:1.45;resize:none;outline:none;}
+  .ac-desc:focus{border-color:var(--ac,#888);color:var(--ink);}
+  .ac-detail{font-size:11px;color:var(--idea);line-height:1.4;margin-top:6px;}
+  .ac-ai{margin-top:7px;border:1px dashed var(--line);background:none;color:var(--muted);font-family:var(--mono);font-size:10px;padding:6px;border-radius:6px;cursor:pointer;}
+  .ac-ai:hover{border-color:var(--ac,#888);color:var(--ink-2);}
   /* co-pilot focus chip */
   .focuschip{margin:10px 18px 0;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--panel);
     font-size:12.5px;color:var(--ink-2);display:flex;align-items:center;gap:8px;}
@@ -296,6 +310,49 @@
   /* drag-to-pan: grab on empty map, nodes keep their pointer */
   .canvas{cursor:grab;}
   .canvas.panning{cursor:grabbing;}
+  /* ── Phrase Lab ── */
+  .lab-hero{background:linear-gradient(150deg,rgba(201,168,224,.10),rgba(120,180,220,.06));border:1px solid var(--line);border-radius:14px;padding:15px 17px;margin-bottom:16px;}
+  .lab-hero h3{margin:0 0 5px;font-size:15px;letter-spacing:.2px;}
+  .lab-hero p{margin:0;color:var(--ink-2);font-size:13px;line-height:1.55;}
+  .iso-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10.5px;color:#B9E2C6;background:rgba(80,180,120,.10);border:1px solid rgba(80,180,120,.30);border-radius:20px;padding:3px 9px;margin-top:9px;}
+  .lab-sec{margin:18px 0 6px;font-family:var(--mono);font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--faint);display:flex;align-items:center;gap:10px;}
+  .lab-sec .ln{flex:1;height:1px;background:var(--line);}
+  .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:11px;}
+  .pcard{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:11px 12px;}
+  .pcard .ph{display:flex;align-items:center;gap:7px;margin-bottom:8px;}
+  .pcard .rtag{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:20px;border:1px solid var(--line);color:var(--ink-2);}
+  .pcard .rtag.target{color:#CDB7E8;border-color:rgba(201,168,224,.4);}
+  .pcard .rtag.advocate{color:#9FE0B4;border-color:rgba(120,200,150,.4);}
+  .pcard .rtag.wrongfit{color:#E8C08A;border-color:rgba(220,170,110,.4);}
+  .pcard .rtag.skeptic{color:#9BC7E8;border-color:rgba(120,180,220,.4);}
+  .pcard input.pn{flex:1;background:transparent;border:none;color:var(--ink);font-size:13.5px;font-weight:600;outline:none;padding:0;}
+  .pcard textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:5px 8px;color:var(--ink-2);font-family:inherit;font-size:12px;resize:vertical;min-height:30px;outline:none;margin-top:6px;line-height:1.4;}
+  .pcard textarea:focus{border-color:var(--idea);color:var(--ink);}
+  .pcard label{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--faint);margin-top:7px;}
+  .lab-phrases{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:12px 13px;color:var(--ink);font-family:inherit;font-size:14px;line-height:1.7;resize:vertical;min-height:96px;outline:none;}
+  .lab-phrases:focus{border-color:var(--idea);}
+  .lab-surface{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:7px 10px;color:var(--ink);font-family:inherit;font-size:13px;outline:none;min-width:220px;}
+  .lab-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0;}
+  .lab-log{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 11px;margin-top:11px;white-space:pre-wrap;line-height:1.6;max-height:150px;overflow-y:auto;display:none;}
+  .lab-log.on{display:block;}
+  .rescard{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px 16px;margin-top:12px;}
+  .rescard .rh{display:flex;align-items:flex-start;gap:12px;}
+  .score{flex:none;width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;font-family:var(--mono);border:1px solid var(--line);}
+  .rescard .rphr{flex:1;font-size:16px;font-weight:600;line-height:1.35;}
+  .rescard .rwhy{color:var(--ink-2);font-size:13px;margin:3px 0 0;line-height:1.5;}
+  .rrisk{margin-top:9px;font-size:12.5px;color:#E8C08A;background:rgba(220,170,110,.08);border:1px solid rgba(220,170,110,.25);border-radius:8px;padding:6px 10px;}
+  .rrisk.bf{color:#F0A0A0;background:rgba(220,110,110,.09);border-color:rgba(220,110,110,.30);}
+  .presults{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px;}
+  .pchip{font-size:11.5px;border:1px solid var(--line);border-radius:9px;padding:5px 9px;cursor:pointer;background:var(--bg);color:var(--ink-2);display:flex;align-items:center;gap:6px;}
+  .pchip:hover{border-color:var(--idea);color:var(--ink);}
+  .pchip .dot{width:8px;height:8px;border-radius:50%;flex:none;}
+  .pdetail{margin-top:10px;border-top:1px solid var(--line);padding-top:10px;font-size:12.5px;color:var(--ink-2);line-height:1.55;display:none;}
+  .pdetail.on{display:block;}
+  .pdetail .pd-h{color:var(--ink);font-weight:600;font-size:12.5px;margin:8px 0 2px;}
+  .pdetail .assoc{display:inline-block;font-size:11px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:2px 7px;margin:3px 4px 0 0;color:var(--ink-2);}
+  .valbar{height:6px;border-radius:4px;background:var(--line);margin-top:5px;overflow:hidden;position:relative;}
+  .valbar i{position:absolute;top:0;bottom:0;display:block;}
+  .rescard .ract{margin-top:11px;display:flex;gap:9px;flex-wrap:wrap;}
   /* export-to-AI modal */
   .modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(8,9,11,.6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
   .modal.on{display:flex;}
@@ -408,7 +465,9 @@ const PCOL={hi:'#FF7A6B',med:'#E8B45C',lo:'#6B7280'};
 // outline layout — columns by depth (X), rows stacked (Y), so the map reads like an aligned list
 const PAD=60, GAP=64, W_VIS=272, W_AREA=232, W_CHILD=380, W_ITEM=476, STEP_RH=32, ITEM_RH=46, ITEM_H=40, ITEM_CHARS=62, AREA_GAP=16, TOP=46;
 const MAXCW=Math.max(W_CHILD,W_ITEM);
+const EXPAND_H=208, AREA_MINH=52;   // expanded-area card height; min vertical block per area
 let CW=1600, CH=1160, VIS={x:PAD,y:560};
+let expandedArea=null;   // id of the area expanded inline on the map (transient, not persisted)
 const trunc=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s;
 function wrap(str,maxChars,maxLines){
   const words=(str||'').trim().split(/\s+/).filter(Boolean);
@@ -426,11 +485,24 @@ function wrap(str,maxChars,maxLines){
 }
 let sel={type:'global'};
 let CHATS={};          // per-focus co-pilot threads, keyed by focusKey() (global | vision | area:<id> | step:<id>)
+let LAB=defLab();      // Phrase Lab: isolated-context messaging resonance tests
+function defLab(){ return {
+  surface:'a poster at a bus stop',
+  model:'anthropic/claude-sonnet-4.5',  // pinned OpenRouter snapshot (methodology §2)
+  phrases:'',          // candidate phrases, one per line
+  personas:[
+    {id:'p1',role:'target',   name:'On-the-fence buyer',   bio:'Fits the product but has not committed.',                  situation:'', concern:'', disposition:'busy, glances fast, mild skepticism toward marketing'},
+    {id:'p2',role:'advocate', name:'Would-be advocate',    bio:'Already sold on the space; passes on lines they love.',     situation:'', concern:'', disposition:'enthusiastic, repeats phrases that land, shares with friends'},
+    {id:'p3',role:'wrongfit', name:'Wrong-fit onlooker',   bio:'Not the target — the backfire check.',                     situation:'', concern:'', disposition:'indifferent; feels excluded or misled by over-broad or scary claims'},
+    {id:'p4',role:'skeptic',  name:'Ad-blind skeptic',     bio:'Scrolls past everything; ad- and PSA-averse.',             situation:'', concern:'', disposition:'ad-blind, dismissive of hype, very hard to stick'}
+  ],
+  runs:[]              // [{phrase, ts, personas:[{id,name,role, prose, valence,associations,resistance,recallVerbatim,recallFeeling,backfire,note}], verdict:{score,why,risk,backfire}}]
+};}
 let flashIds=new Set();// ids of nodes/items just created or edited, to flash on next render
 let panSuppress=false; // true right after a drag-pan, to swallow the trailing click
 let bubbleXY=null;     // last node-bubble position (to refresh after edits)
 let stage='mindmap';
-const STAGES=[['intake','1 · Intake'],['invest','2 · Invest & Simulate'],['mindmap','3 · Mind Map'],['schedule','4 · Schedule'],['checkin','5 · Check-ins'],['report','6 · Report']];
+const STAGES=[['intake','1 · Intake'],['invest','2 · Invest & Simulate'],['mindmap','3 · Mind Map'],['schedule','4 · Schedule'],['checkin','5 · Check-ins'],['report','6 · Report'],['phraselab','✷ Phrase Lab']];
 // URL ↔ tab: slug derived from the tab label so it always matches (e.g. "2 · Invest & Simulate" → "invest-simulate")
 const stageSlug=id=>{const e=STAGES.find(s=>s[0]===id);return e?e[1].replace(/^[^·]*·\s*/,'').trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''):id;};
 const slugStage=sl=>{const e=STAGES.find(s=>stageSlug(s[0])===sl);return e?e[0]:null;};
@@ -450,12 +522,15 @@ function layout(){
     let y=0;
     arr.forEach(a=>{ a._x=xA; a._side=side;
       const kids=[...a.steps.map(s=>[s,false]), ...(a.items||[]).map(it=>[it,true])];
-      if(kids.length){
-        kids.forEach(([k,isItem])=>{ const w=isItem?W_ITEM:W_CHILD, rh=isItem?ITEM_RH:STEP_RH;
-          k._side=side; k._w=w; k._x=side==='left'?childRight-w:childLeft; k._y=y+rh/2; y+=rh; });
-        a._y=(kids[0][0]._y+kids[kids.length-1][0]._y)/2;
-      } else { a._y=y+STEP_RH/2; y+=STEP_RH; }
-      y+=AREA_GAP; });
+      const kidsH=kids.reduce((s,[k,isItem])=>s+(isItem?ITEM_RH:STEP_RH),0);
+      const blockH=Math.max(kidsH, expandedArea===a.id?EXPAND_H:0, AREA_MINH);   // expanded area reserves its full height
+      const top=y;
+      let ky=top+(blockH-kidsH)/2;            // center the children within the reserved block
+      kids.forEach(([k,isItem])=>{ const w=isItem?W_ITEM:W_CHILD, rh=isItem?ITEM_RH:STEP_RH;
+        k._side=side; k._w=w; k._x=side==='left'?childRight-w:childLeft; k._y=ky+rh/2; ky+=rh; });
+      a._y=top+blockH/2;                      // area centered in its block
+      y=top+blockH+AREA_GAP;
+    });
     return arr.length ? y-AREA_GAP : 0;
   };
   const lh=layside(left,'left',xAreaL), rh=layside(right,'right',xAreaR);
@@ -578,10 +653,14 @@ function visionNode(){
   grp.addEventListener('mousemove',e=>showTip(e,'<b>The Vision</b><br>'+esc(VISION||'(not set yet)')));grp.addEventListener('mouseleave',hideTip);
   return grp;
 }
+// click an area: expand it inline (not the floating bubble); steps/vision still use the bubble
+function clickArea(a){ sel={type:'area',id:a.id}; expandedArea=a.id; bubbleXY=null;
+  $('#bubble').style.display='none'; buildMap(); renderChat(); ensureNodeGen(); }
 function areaNode(a){
+  if(expandedArea===a.id) return areaNodeExpanded(a);
   const ag=agg(a), c=HCOL[a.h], W=W_AREA, H=48, L=a._side==='left';
   const grp=group(a._x,a._y,'node area '+(a.pruned?'pruned ':'')+(sel.type==='area'&&sel.id===a.id?'sel':''),
-    ()=>focusNode('area',a.id,a._x+W/2,a._y+H/2));
+    ()=>clickArea(a));
   grp.setAttribute('data-nid',a.id); grp.setAttribute('id','node-'+a.id);
   grp.appendChild(mk('rect',{class:'ring-sel',x:-5,y:-H/2-5,width:W+10,height:H+10,rx:12,fill:'none',stroke:c,'stroke-width':1.5}));
   grp.appendChild(mk('rect',{x:0,y:-H/2,width:W,height:H,rx:10,fill:'#1A1D23',stroke:c,'stroke-opacity':.55,'stroke-width':1.3,class:'shape'}));
@@ -593,6 +672,33 @@ function areaNode(a){
   grp.appendChild(mk('rect',{x:16,y:H/2-9,width:W-30,height:3,rx:1.5,fill:'#2A2F37'}));
   grp.appendChild(mk('rect',{x:L?(16+(W-30)*(1-ag.frac)).toFixed(1):16,y:H/2-9,width:((W-30)*ag.frac).toFixed(1),height:3,rx:1.5,fill:'#5FBE9C'}));
   grp.addEventListener('mousemove',e=>showTip(e,`<b>${esc(a.t)}</b><br>${ag.doneN}/${ag.n} done · ${ag.openH}h left${a.pruned?' · pruned':''}`));grp.addEventListener('mouseleave',hideTip);
+  return grp;
+}
+// expanded area: a tall in-map card (HTML via foreignObject) with the editable description + detail + ask button
+function areaNodeExpanded(a){
+  const c=HCOL[a.h], W=W_AREA, H=EXPAND_H, L=a._side==='left', ag=agg(a), detail=(a.gen&&a.gen.detail)||'';
+  const grp=group(a._x,a._y,'node area expanded sel'+(a.pruned?' pruned':''),null);
+  grp.setAttribute('data-nid',a.id); grp.setAttribute('id','node-'+a.id);
+  grp.appendChild(mk('rect',{class:'ring-sel',x:-5,y:-H/2-5,width:W+10,height:H+10,rx:13,fill:'none',stroke:c,'stroke-width':1.5}));
+  grp.appendChild(mk('rect',{x:0,y:-H/2,width:W,height:H,rx:11,fill:'#1A1D23',stroke:c,'stroke-opacity':.7,'stroke-width':1.4,class:'shape'}));
+  grp.appendChild(mk('rect',{x:L?W-5:0,y:-H/2,width:5,height:H,fill:c,'fill-opacity':.9}));
+  const fo=mk('foreignObject',{x:1,y:-H/2+1,width:W-2,height:H-2});
+  const div=document.createElement('div'); div.setAttribute('xmlns','http://www.w3.org/1999/xhtml');
+  div.className='acard'; div.style.setProperty('--ac',c);
+  div.innerHTML=`
+    <div class="ac-head"><span class="ac-tag">${a.h==='left'?'build':'market'} · area</span><button class="ac-x" title="collapse">✕</button></div>
+    <div class="ac-title">${esc(a.t)}</div>
+    <div class="ac-meta">${ag.doneN}/${ag.n} steps · ${(a.items||[]).length} items · ${ag.openH}h left</div>
+    <div class="ac-lab">what this is</div>
+    <textarea class="ac-desc" placeholder="Describe what this is and why it matters…">${esc(a.desc||'')}</textarea>
+    ${detail?`<div class="ac-detail">→ ${esc(detail)}</div>`:''}
+    <button class="ac-ai">✨ ask co-pilot to describe this</button>`;
+  fo.appendChild(div); grp.appendChild(fo);
+  div.addEventListener('pointerdown',e=>e.stopPropagation());   // don't start a map-pan from inside the card
+  div.querySelector('.ac-x').addEventListener('click',e=>{ e.stopPropagation(); expandedArea=null; buildMap(); renderChat(); });
+  div.querySelector('.ac-desc').addEventListener('change',e=>{ a.desc=e.target.value; touch(); });
+  div.querySelector('.ac-ai').addEventListener('click',e=>{ e.stopPropagation();
+    globalSend(`In one or two sentences, describe what "${a.t}" is and why it matters for this launch, then save it with editArea desc.`,'…describing'); });
   return grp;
 }
 function stepNode(a,st){
@@ -659,8 +765,8 @@ function transcriptFor(thread,maxWords){
 }
 
 // focus a node: select it, redraw, pop the description bubble below it, tell the co-pilot
-function focusNode(type,id,x,y){ sel={type,id}; buildMap(); renderChat(); showBubble(x,y); ensureNodeGen(); }
-function clearFocus(){ sel={type:'global'}; $('#bubble').style.display='none'; buildMap(); renderChat(); }
+function focusNode(type,id,x,y){ sel={type,id}; expandedArea=null; buildMap(); renderChat(); showBubble(x,y); ensureNodeGen(); }
+function clearFocus(){ sel={type:'global'}; expandedArea=null; $('#bubble').style.display='none'; buildMap(); renderChat(); }
 
 // per-node generated detail + guiding question, cached and regenerated when the node/plan changes
 let genBusy=new Set();
@@ -680,7 +786,7 @@ async function ensureNodeGen(){
   const obj=await askClaude(sys,prompt);
   node.gen={ detail:(obj&&obj.detail)||'', q:(obj&&obj.question)||'', sig };
   genBusy.delete(node.id); touch();
-  if(focusedNode()===node){ renderChat(); if(bubbleXY) showBubble(bubbleXY.x,bubbleXY.y); }
+  if(focusedNode()===node){ renderChat(); if(expandedArea===node.id) buildMap(); else if(bubbleXY) showBubble(bubbleXY.x,bubbleXY.y); }
 }
 function focusTitle(){ if(sel.type==='vision')return NAME; if(sel.type==='area'){const a=AREAS.find(x=>x.id===sel.id);return a?a.t:'';} const st=findStep(sel.id);return st?st.t:''; }
 function focusLine(){
@@ -820,6 +926,7 @@ function applyStage(){
   if(stage==='intake') return renderIntake(stub);
   if(stage==='invest') return renderInvest(stub);
   if(stage==='schedule') return renderSchedule(stub);
+  if(stage==='phraselab') return renderPhraseLab(stub);
   const N={checkin:'Daily check-ins',report:'Final report'};
   stub.innerHTML=`<div class="stubcard"><div class="stubn">${N[stage]}</div><p>Coming next. Intake, Invest and the Mind Map are working — these later stages will consume that plan.</p></div>`;
 }
@@ -1394,7 +1501,185 @@ function applyFlash(){
 // ---------- persistence + concept switching (Postgres via /api/concept) ----------
 let CID='hannah';
 let saveT=null;
-function serialize(){ return {name:NAME, vision:VISION, areas:AREAS, intake:INTAKE, budget:BUDGET, schedule:SCHEDULE, sim:{priors:SIM.priors,alloc:SIM.alloc}, chats:CHATS}; }
+// ---------- Phrase Lab: isolated-context messaging resonance testing ----------
+// Cardinal rule: one phrase, one persona, one FRESH context. Measurement runs hit the RAW
+// OpenRouter API (/api/raw) — not the co-pilot sidecar — so no wrapper injects a system prompt
+// we can't hold constant (methodology §2), and the model snapshot is pinned (LAB.model). Every
+// call is a fresh stateless request, so isolation is structural. Generation (suggest/seed) and
+// the retro run in their own contexts too, so the persona reading stays naive.
+async function askRaw(system,prompt){
+  for(let i=0;i<2;i++){
+    try{ const r=await fetch('/api/raw',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({system,prompt,model:LAB.model||undefined})});
+      const j=await r.json(); const out=(((j.result||'')+'').trim())||(((j.error||'')+'').trim())||'';
+      if(out && !/rate.?limit|overloaded|timed? ?out|temporarily|\b(429|502|503)\b/i.test(out)) return out;
+      if(i===0){ await sleep(1500); continue; }
+      return out;
+    }catch(e){ if(i===0){ await sleep(1500); continue; } return 'Error: '+e.message; }
+  }
+  return '';
+}
+function pluckJSON(raw){ const m=(raw||'').match(/\{[\s\S]*\}/); if(m){try{return JSON.parse(m[0]);}catch(e){}} return null; }
+function pluckArray(raw){ const m=(raw||'').match(/\[[\s\S]*\]/); if(m){try{return JSON.parse(m[0]);}catch(e){}} return null; }
+function clampNum(v,lo,hi,d){ v=+v; if(!isFinite(v))return d; return Math.max(lo,Math.min(hi,Math.round(v))); }
+function scoreColor(s){ return s>=70?'#8FD9A8':s>=45?'#E8C08A':'#E89090'; }
+function valColor(v){ return v>=1?'#8FD9A8':v<=-1?'#E89090':'#C9C4CC'; }
+function labContext(){ let s='PRODUCT: '+(NAME||'(unnamed)'); if(VISION)s+='\nVISION: '+VISION;
+  if(INTAKE.problem)s+='\nPROBLEM: '+INTAKE.problem; if(INTAKE.build)s+='\nWHAT IT IS: '+INTAKE.build; if(INTAKE.why)s+='\nWHY IT MATTERS: '+INTAKE.why;
+  return s; }
+function personaSystem(p){ return `You are ${p.name}. ${p.bio}
+
+Internal state — hold these silently in mind at all times; never state them unless asked to introspect:
+- Your current situation: ${p.situation||'(ordinary daily life)'}
+- Your one standing concern or desire: ${p.concern||'(nothing pressing)'}
+- Your disposition toward marketing: ${p.disposition}
+
+You will be shown a short phrase, the way you'd meet it in real life. React as yourself — a real person glancing at it — not as a copywriter, marketer, or analyst. Do not rate it as advertising. Keep it brief and plain.`; }
+function phrasePrompt(phrase){ return `You see this on ${LAB.surface||'a poster'}:
+
+"${phrase}"
+
+Answer briefly, as yourself, in order:
+1) First two seconds — what actually goes through your mind?
+2) What's active right now — images, associations, a memory it touched, any resistance or counter-argument. Report the contents; don't judge the phrase.
+3) Hours later, the next time this subject comes up in your life — does anything resurface? Could you say the line back word-for-word? What feeling is attached to it now?
+
+Then, on a new final line, output ONLY this JSON object (nothing after it):
+{"valence": <-2..2 gut pull toward acting on it>, "associations": [up to 4 short strings], "resistance": "<one line, or empty>", "recallVerbatim": <true|false>, "recallFeeling": "<one word or short phrase>", "backfire": <true|false — did it wrongly push you away, mislead you, or feel like it wasn't meant for someone like you>, "note": "<one line: the single most useful signal here>"}`; }
+async function retroFor(phrase,pres){
+  const sys="You are a message-testing analyst. You receive naive first-person reactions to ONE candidate marketing phrase, each from a different person tested in a separate isolated context. Assess the phrase's resonance (did it activate something real) and durability (would it stick and re-surface at the decision moment). You are NOT a copywriter — do not rewrite it; judge what the reactions show. Weigh backfire heavily: a phrase that pushes a good-fit person away or misleads is dangerous even if catchy.";
+  const data=pres.map(p=>`• ${p.name} [${p.role}] valence=${p.valence} recallVerbatim=${p.recallVerbatim} feeling="${p.recallFeeling}" backfire=${p.backfire}\n   associations: ${(p.associations||[]).join(', ')||'—'}\n   resistance: ${p.resistance||'none'}\n   signal: ${p.note||'—'}`).join('\n');
+  const prompt=`Candidate phrase:\n"${phrase}"\n\nReactions (each an isolated test):\n${data}\n\nOutput ONLY a JSON object:\n{"score": <0-100 resonance×durability>, "why":"<one line — what makes it work or not>", "risk":"<the single biggest risk or backfire, one line>", "backfire": <true|false>}`;
+  const j=pluckJSON(await askRaw(sys,prompt))||{};
+  return {score:clampNum(j.score,0,100,0), why:j.why||'—', risk:j.risk||'', backfire:!!j.backfire};
+}
+function labLog(msg,reset){ const el=$('#lab_log'); if(!el)return; el.classList.add('on'); if(reset)el.textContent=''; el.textContent+=(el.textContent&&!reset?'\n':'')+msg; el.scrollTop=el.scrollHeight; }
+async function runPhraseLab(){
+  const phrases=LAB.phrases.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,12);
+  if(!phrases.length){ labLog('Add at least one phrase to test.',true); return; }
+  const btn=$('#lab_run'); if(btn){btn.disabled=true;btn.textContent='🧪 Testing…';}
+  LAB.runs=[]; labLog('Spawning isolated contexts — one persona, one phrase, no cross-contamination.',true);
+  for(const phrase of phrases){
+    const pres=[];
+    for(const p of LAB.personas){
+      labLog(`🔒 “${trunc(phrase,40)}” → ${p.name} …`);
+      const raw=await askRaw(personaSystem(p), phrasePrompt(phrase));
+      const j=pluckJSON(raw)||{};
+      const prose=raw.replace(/\{[\s\S]*\}\s*$/,'').trim();
+      pres.push({id:p.id,name:p.name,role:p.role, prose,
+        valence:clampNum(j.valence,-2,2,0), associations:Array.isArray(j.associations)?j.associations.slice(0,4).map(x=>''+x):[],
+        resistance:j.resistance||'', recallVerbatim:!!j.recallVerbatim, recallFeeling:j.recallFeeling||'',
+        backfire:!!j.backfire, note:j.note||''});
+    }
+    labLog('   ↳ retro in a fresh analyst context …');
+    const verdict=await retroFor(phrase,pres);
+    LAB.runs.push({phrase,ts:Date.now(),personas:pres,verdict});
+    LAB.runs.sort((a,b)=>(b.verdict.score||0)-(a.verdict.score||0));
+    renderLabResults(); touch();
+  }
+  labLog('\n✓ Done — ranked by resonance × durability. These are hypothesis-generators; take the survivors to real humans.');
+  if(btn){btn.disabled=false;btn.textContent='🧪 Run resonance test';}
+}
+async function suggestPhrases(){
+  const btn=$('#lab_suggest'); if(btn){btn.disabled=true;btn.textContent='✨ Thinking…';}
+  const sys="You are a sharp direct-response copywriter. Generate short, testable candidate phrases (headlines / soundbites) for the product described. Durable phrases are seeded states, not arguments — favour concrete nouns, rhythm, and one clear feeling. Mix awareness-payload lines with action-payload lines. Keep each under ~9 words. Never sacrifice accuracy for catchiness.";
+  const arr=pluckArray(await askRaw(sys, labContext()+'\n\nGive 8 candidate phrases. Output ONLY a JSON array of strings.'));
+  if(arr&&arr.length){ const cur=LAB.phrases.trim();
+    LAB.phrases=(cur?cur+'\n':'')+arr.map(s=>(''+s).replace(/^["'\s]+|["'\s]+$/g,'')).filter(Boolean).join('\n');
+    const ta=$('#lab_phrases'); if(ta)ta.value=LAB.phrases; touch(); }
+  if(btn){btn.disabled=false;btn.textContent='✨ Suggest phrases from my vision';}
+}
+async function seedPersonas(){
+  const btn=$('#lab_seed'); if(btn){btn.disabled=true;btn.textContent='✨ Seeding…';}
+  const sys="You design realistic audience personas for message testing. For each role, write a CONCRETE current situation (one vivid sentence — specific detail beats a vague flag) and ONE standing concern or desire (a single silent worry or want, sharper than a list). Ground them in the product's real audience. One sentence per field.";
+  const roles=LAB.personas.map(p=>`- ${p.id} [${p.role}] ${p.name}: ${p.bio}`).join('\n');
+  const j=pluckJSON(await askRaw(sys, labContext()+`\n\nPersonas:\n${roles}\n\nOutput ONLY a JSON object mapping each id to {"situation":"...","concern":"..."}. Ids: ${LAB.personas.map(p=>p.id).join(', ')}.`))||{};
+  LAB.personas.forEach(p=>{ if(j[p.id]){ if(j[p.id].situation)p.situation=j[p.id].situation; if(j[p.id].concern)p.concern=j[p.id].concern; }});
+  touch(); renderPhraseLab($('#stub'));
+}
+function sendPhraseToMap(phrase){
+  let area=AREAS.find(a=>a.h==='right'&&/messag|copy|phrase/i.test(a.t));
+  if(!area){ applyAction({tool:'addArea',args:{hemisphere:'right',title:'Messaging',sub:'market',desc:'Validated phrases and copy tests.'}}); area=AREAS[AREAS.length-1]; }
+  applyAction({tool:'addStep',args:{areaId:area.id,title:'Test “'+phrase+'” against a control',prio:'high',
+    bet:'“'+phrase+'” out-resonates our current line at the decision moment.',
+    watch:'verbatim recall + click / reply rate vs. a control phrase.'}});
+  buildMap(); applyFlash(); touch(); goStage('mindmap');
+}
+function labPersonaDetail(p,ri,pi){
+  const col=valColor(p.valence), w=Math.round((p.valence+2)/4*100);
+  return `<div class="pdetail" id="pd_${ri}_${pi}">
+    <div class="pd-h">${esc(p.name)} · gut pull ${p.valence>0?'+':''}${p.valence}</div>
+    <div class="valbar"><i style="position:relative;height:100%;width:${w}%;background:${col};display:block"></i></div>
+    ${p.associations.length?`<div style="margin-top:7px">${p.associations.map(a=>`<span class="assoc">${esc(a)}</span>`).join('')}</div>`:''}
+    ${p.resistance?`<div class="pd-h">resistance</div>${esc(p.resistance)}`:''}
+    <div class="pd-h">durability</div>${p.recallVerbatim?'✓ could reproduce it word-for-word':'✗ paraphrase at best'} · feeling now: ${esc(p.recallFeeling||'—')}
+    ${p.note?`<div class="pd-h">signal</div>${esc(p.note)}`:''}
+    ${p.prose?`<div class="pd-h">what they said</div><div style="opacity:.72;font-style:italic;white-space:pre-wrap">${esc(trunc(p.prose,700))}</div>`:''}
+  </div>`;
+}
+function renderLabResults(){
+  const box=$('#lab_results'); if(!box) return;
+  if(!LAB.runs.length){ box.innerHTML=''; return; }
+  box.innerHTML='<div class="lab-sec">Results — resonance × durability<span class="ln"></span></div>'+LAB.runs.map((r,ri)=>{
+    const s=r.verdict.score||0, sc=scoreColor(s);
+    const chips=r.personas.map((p,pi)=>{ const col=valColor(p.valence), mark=p.backfire?'⚠':(p.recallVerbatim?'●':'○');
+      return `<div class="pchip" data-run="${ri}" data-p="${pi}"><span class="dot" style="background:${col}"></span>${esc(p.name)} <b style="color:${col}">${mark}</b></div>`;}).join('');
+    const detail=r.personas.map((p,pi)=>labPersonaDetail(p,ri,pi)).join('');
+    return `<div class="rescard">
+      <div class="rh"><div class="score" style="color:${sc};border-color:${sc}">${s}</div>
+        <div><div class="rphr">“${esc(r.phrase)}”</div><p class="rwhy">${esc(r.verdict.why||'')}</p></div></div>
+      ${r.verdict.risk?`<div class="rrisk ${r.verdict.backfire?'bf':''}">${r.verdict.backfire?'⚠ backfire — ':'risk — '}${esc(r.verdict.risk)}</div>`:''}
+      <div class="presults">${chips}</div><div>${detail}</div>
+      <div class="ract"><button class="tool" data-send="${ri}">→ Turn into a market experiment</button></div>
+    </div>`;
+  }).join('');
+  box.querySelectorAll('.pchip').forEach(c=>c.addEventListener('click',()=>{
+    const d=$('#pd_'+c.dataset.run+'_'+c.dataset.p); if(d)d.classList.toggle('on');}));
+  box.querySelectorAll('[data-send]').forEach(b=>b.addEventListener('click',()=>sendPhraseToMap(LAB.runs[+b.dataset.send].phrase)));
+}
+function renderPhraseLab(stub){
+  const personas=LAB.personas.map((p,i)=>`
+    <div class="pcard" data-pi="${i}">
+      <div class="ph"><span class="rtag ${p.role}">${p.role}</span><input class="pn" value="${esc(p.name)}" data-f="name"></div>
+      <label>current situation</label><textarea data-f="situation" placeholder="concrete detail — “counted the empties Tuesday”">${esc(p.situation)}</textarea>
+      <label>one standing concern / desire</label><textarea data-f="concern" placeholder="a single silent worry or want">${esc(p.concern)}</textarea>
+      <label>disposition</label><textarea data-f="disposition">${esc(p.disposition)}</textarea>
+    </div>`).join('');
+  stub.innerHTML=`<div class="pane" style="max-width:940px">
+    <h2>Phrase Lab — test what a line <em>installs</em>, not what it argues</h2>
+    <div class="lab-hero">
+      <h3>Durable messages are seeded states, not arguments.</h3>
+      <p>A phrase doesn't convince anyone as they read it — it plants a pattern that re-activates later, at the decision. So we don't ask “is this good copy?” We expose a seeded persona to one phrase and read back what it <b>activates</b> and whether it <b>survives</b>. Each exposure is a <b>raw-API</b> call — no product wrapper, no injected system prompt, a pinned model — one phrase, one persona, zero cross-contamination. The analysis happens in a separate context so the reading stays naive. Reports are a proxy signal and a cheap wide funnel: kill the weak lines here, take the survivors to real people.</p>
+      <span class="iso-badge">🔒 raw OpenRouter call per exposure · pinned model · naive-reading guaranteed</span>
+    </div>
+
+    <div class="lab-sec">Persona panel<span class="ln"></span><button class="tool" id="lab_seed">✨ Seed personas from my project</button></div>
+    <p class="lead" style="margin:0 0 11px">Seed <b>concrete</b> internal states — specifics beat vague flags. Keep the wrong-fit persona: it's your backfire check (a line that scares off a good-fit reader fails, however catchy).</p>
+    <div class="pgrid">${personas}</div>
+
+    <div class="lab-sec">Candidate phrases<span class="ln"></span><button class="tool" id="lab_suggest">✨ Suggest phrases from my vision</button></div>
+    <textarea class="lab-phrases" id="lab_phrases" placeholder="One phrase per line…">${esc(LAB.phrases)}</textarea>
+    <div class="lab-row">
+      <label style="color:var(--ink-2);font-size:13px">Delivery surface</label>
+      <input class="lab-surface" id="lab_surface" value="${esc(LAB.surface)}">
+      <label style="color:var(--ink-2);font-size:13px">Model (pinned)</label>
+      <input class="lab-surface" id="lab_model" style="min-width:200px;font-family:var(--mono);font-size:12px" value="${esc(LAB.model)}">
+      <button class="genbtn" id="lab_run">🧪 Run resonance test</button>
+    </div>
+    <div class="lab-log" id="lab_log"></div>
+    <div id="lab_results"></div>
+  </div>`;
+  stub.querySelectorAll('.pcard').forEach(card=>{ const i=+card.dataset.pi;
+    card.querySelectorAll('[data-f]').forEach(el=>el.addEventListener('input',()=>{ LAB.personas[i][el.dataset.f]=el.value; touch(); })); });
+  $('#lab_phrases').addEventListener('input',e=>{ LAB.phrases=e.target.value; touch(); });
+  $('#lab_surface').addEventListener('input',e=>{ LAB.surface=e.target.value; touch(); });
+  $('#lab_model').addEventListener('input',e=>{ LAB.model=e.target.value.trim(); touch(); });
+  $('#lab_run').addEventListener('click',runPhraseLab);
+  $('#lab_suggest').addEventListener('click',suggestPhrases);
+  $('#lab_seed').addEventListener('click',seedPersonas);
+  renderLabResults();
+}
+function serialize(){ return {name:NAME, vision:VISION, areas:AREAS, intake:INTAKE, budget:BUDGET, schedule:SCHEDULE, sim:{priors:SIM.priors,alloc:SIM.alloc}, chats:CHATS, lab:LAB}; }
 function save(now){
   clearTimeout(saveT);
   const doit=async()=>{ try{ await fetch('/api/concept',{method:'PUT',headers:{'Content-Type':'application/json'},
@@ -1408,7 +1693,9 @@ function applyConcept(d){ NAME=d.name||'Untitled'; VISION=d.vision||''; AREAS=Ar
   SCHEDULE=(d.schedule&&Array.isArray(d.schedule.days))?d.schedule:{days:[]};
   SIM=(d.sim&&d.sim.priors)?{priors:Object.assign(defSimPriors(),d.sim.priors),alloc:Object.assign(defSimAlloc(),d.sim.alloc||{})}:{priors:defSimPriors(),alloc:defSimAlloc()};
   if(!SIM.alloc.price)SIM.alloc.price=SIM.priors.price.base; SIM_MATRIX=null;
-  CHATS=(d.chats&&typeof d.chats==='object')?d.chats:{}; flashIds=new Set();
+  CHATS=(d.chats&&typeof d.chats==='object')?d.chats:{};
+  LAB=d.lab&&Array.isArray(d.lab.personas)?Object.assign(defLab(),d.lab):defLab();
+  flashIds=new Set(); expandedArea=null;
   sel={type:'global'}; bubbleXY=null; }
 async function loadConcept(){
   try{ const r=await fetch('/api/concept?id='+CID);

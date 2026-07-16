@@ -8,6 +8,7 @@
  *   node server.mjs           # http://localhost:5566
  */
 import { createServer, request as httpRequest } from 'http';
+import { request as httpsRequest } from 'https';
 import { readFile } from 'fs/promises';
 import { extname, join, normalize } from 'path';
 import { fileURLToPath } from 'url';
@@ -20,6 +21,11 @@ const SECRET = process.env.SHANNON_SECRET && process.env.SHANNON_SECRET !== 'not
   ? process.env.SHANNON_SECRET : null;
 const MIME = { '.html':'text/html', '.js':'text/javascript', '.mjs':'text/javascript',
   '.json':'application/json', '.css':'text/css', '.svg':'image/svg+xml' };
+
+// Phrase Lab measurement runs go through the RAW OpenRouter API — no CLI wrapper injecting
+// a system prompt we can't hold constant (methodology §2). Key lives ONLY in env, never the repo.
+const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || null;
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'anthropic/claude-sonnet-4.5';
 
 const DB_URL = process.env.DATABASE_URL ?? 'postgres://postgres:postgres@localhost:5433/launch_engine';
 const db = new pg.Pool({ connectionString: DB_URL, max: 4 });
@@ -66,12 +72,54 @@ function proxyClaude(reqBody, res) {
   pr.write(out); pr.end();
 }
 
+// Raw OpenRouter proxy — OpenAI-compatible /chat/completions. Returns {result} so the
+// client's askRaw() reads it the same way as the Claude sidecar.
+function proxyOpenRouter(reqBody, res) {
+  if (!OPENROUTER_KEY) return sendJSON(res, 500, { error: 'OPENROUTER_API_KEY not set on the server' });
+  const payload = JSON.parse(reqBody);
+  const body = JSON.stringify({
+    model: payload.model || OPENROUTER_MODEL,
+    messages: [
+      ...(payload.system ? [{ role:'system', content: payload.system }] : []),
+      { role:'user', content: payload.prompt || '' },
+    ],
+    temperature: payload.temperature ?? 0.9,
+    max_tokens: payload.max_tokens ?? 900,
+  });
+  const headers = {
+    'Content-Type':'application/json', 'Content-Length': Buffer.byteLength(body),
+    'Authorization': `Bearer ${OPENROUTER_KEY}`,
+    'HTTP-Referer': 'https://runway.pathwriter.world', 'X-Title': 'Launch Engine · Phrase Lab',
+  };
+  const pr = httpsRequest(
+    { hostname:'openrouter.ai', path:'/api/v1/chat/completions', method:'POST', headers },
+    pres => { let d=''; pres.on('data', c => d+=c); pres.on('end', () => {
+      try {
+        const j = JSON.parse(d);
+        const txt = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+        if (txt != null) return sendJSON(res, 200, { result: txt, model: j.model });
+        return sendJSON(res, (pres.statusCode && pres.statusCode >= 400) ? pres.statusCode : 502,
+          { error: (j && j.error && j.error.message) || d || 'no content' });
+      } catch (e) { return sendJSON(res, (pres.statusCode && pres.statusCode >= 400) ? pres.statusCode : 502, { error: d || e.message }); }
+    }); }
+  );
+  pr.on('error', e => sendJSON(res, 502, { error: e.message }));
+  pr.write(body); pr.end();
+}
+
 createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
 
-  // ---- Claude proxy ----
+  // ---- Claude proxy (co-pilot, via Open Shannon sidecar) ----
   if (req.method === 'POST' && url.pathname === '/api/claude') {
     try { proxyClaude(await readBody(req), res); }
+    catch (e) { sendJSON(res, 400, { error: e.message }); }
+    return;
+  }
+
+  // ---- raw OpenRouter proxy (Phrase Lab measurement runs) ----
+  if (req.method === 'POST' && url.pathname === '/api/raw') {
+    try { proxyOpenRouter(await readBody(req), res); }
     catch (e) { sendJSON(res, 400, { error: e.message }); }
     return;
   }
@@ -127,6 +175,7 @@ createServer(async (req, res) => {
 }).listen(PORT, async () => {
   console.log(`Launch Engine → http://localhost:${PORT}`);
   console.log(`  proxying /api/claude → ${SIDECAR}/claude${SECRET ? ' (auth on)' : ''}`);
+  console.log(`  proxying /api/raw    → openrouter.ai (${OPENROUTER_KEY ? `key set, model ${OPENROUTER_MODEL}` : 'NO KEY — set OPENROUTER_API_KEY'})`);
   try { await ensureDb(); console.log('  postgres → ready (db + table ensured)'); }
   catch (e) { console.log(`  postgres → NOT ready: ${e.message}`); }
 });

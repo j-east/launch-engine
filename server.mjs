@@ -63,6 +63,47 @@ const sendJSON = (res, status, data) => {
   res.writeHead(status, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(data));
 };
 
+// ---- rate limiting (in-memory, per-IP fixed window + global backstop) ----
+// No external store: this is a single container, so a Map is enough. Behind
+// Coolify/Traefik the real client is the left-most X-Forwarded-For entry.
+const clientIp = req => {
+  const xff = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  return xff || req.socket?.remoteAddress || 'unknown';
+};
+const buckets = new Map(); // key -> { count, resetAt }
+function hit(key, max, windowMs) {
+  const now = Date.now();
+  let b = buckets.get(key);
+  if (!b || now >= b.resetAt) { b = { count: 0, resetAt: now + windowMs }; buckets.set(key, b); }
+  b.count++;
+  return { ok: b.count <= max, remaining: Math.max(0, max - b.count), retryAfter: Math.ceil((b.resetAt - now) / 1000) };
+}
+// Drop expired buckets so the Map can't grow without bound.
+setInterval(() => { const now = Date.now(); for (const [k, b] of buckets) if (now >= b.resetAt) buckets.delete(k); }, 60_000).unref();
+
+// Tiers. login = tight (shared password is brute-forceable); llm = expensive
+// (burns the Claude subscription / OpenRouter credits); default = generous for
+// autosave and concept CRUD. The 'global' checks are a hard ceiling regardless
+// of source IP, so a distributed flood still can't run up cost.
+const M = 60 * 1000;
+const RL = {
+  login:   [ { name: 'login', scope: 'ip', max: 10, windowMs: 15 * M }, { name: 'login', scope: 'global', max: 60,  windowMs: 15 * M } ],
+  llm:     [ { name: 'llm',   scope: 'ip', max: 30, windowMs: 5 * M },  { name: 'llm',   scope: 'global', max: 120, windowMs: 5 * M } ],
+  default: [ { name: 'api',   scope: 'ip', max: 120, windowMs: 1 * M } ],
+};
+function enforceRate(res, ip, checks) {
+  for (const c of checks) {
+    const r = hit(c.scope === 'global' ? `g:${c.name}` : `${c.name}:${ip}`, c.max, c.windowMs);
+    if (c.scope === 'ip') { res.setHeader('X-RateLimit-Limit', String(c.max)); res.setHeader('X-RateLimit-Remaining', String(r.remaining)); }
+    if (!r.ok) {
+      res.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': String(r.retryAfter) });
+      res.end(JSON.stringify({ error: 'rate limit exceeded', scope: c.scope, retryAfter: r.retryAfter }));
+      return false;
+    }
+  }
+  return true;
+}
+
 function proxyClaude(reqBody, res) {
   const u = new URL(SIDECAR + '/claude');
   const payload = JSON.parse(reqBody);
@@ -118,6 +159,14 @@ function proxyOpenRouter(reqBody, res) {
 
 createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
+
+  // ---- rate limiting: all /api routes, tier by cost, before any real work ----
+  if (url.pathname.startsWith('/api/')) {
+    const tier = url.pathname === '/api/login' ? RL.login
+      : (url.pathname === '/api/claude' || url.pathname === '/api/raw') ? RL.llm
+      : RL.default;
+    if (!enforceRate(res, clientIp(req), tier)) return;
+  }
 
   // ---- auth: login sets the cookie; everything else under /api requires it ----
   if (req.method === 'POST' && url.pathname === '/api/login') {

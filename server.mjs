@@ -21,7 +21,44 @@ const SIDECAR = process.env.SHANNON_URL ?? 'http://localhost:4445';
 const SECRET = process.env.SHANNON_SECRET && process.env.SHANNON_SECRET !== 'not-set'
   ? process.env.SHANNON_SECRET : null;
 const MIME = { '.html':'text/html', '.js':'text/javascript', '.mjs':'text/javascript',
-  '.json':'application/json', '.css':'text/css', '.svg':'image/svg+xml' };
+  '.json':'application/json', '.css':'text/css', '.svg':'image/svg+xml',
+  '.txt':'text/plain; charset=utf-8', '.xml':'application/xml', '.png':'image/png',
+  '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.webp':'image/webp', '.ico':'image/x-icon' };
+
+// ---- public marketing/docs pages (GEO layer) ------------------------------
+// Each path renders a content fragment (site/pages/<file>.html) into the shared
+// shell (site/shell.html) SERVER-SIDE, so the text is in the HTML and crawlable
+// with no client JS. An optional site/pages/<file>.jsonld is injected into the
+// head (phase 2: schema.org structured data).
+const SITE_ORIGIN = process.env.SITE_ORIGIN ?? 'https://runway.pathwriter.world';
+const PAGE_YEAR = '2026';
+const PAGES = {
+  '/':             { file:'home',         title:'Launch Engine — an AI launch co-pilot', desc:'Turn your product, goal, timeline, and budget into a prioritized, scheduled launch to-do list of concrete build and market actions.' },
+  '/how-it-works': { file:'how-it-works', title:'How Launch Engine works — six stages to launch', desc:'From product and budget to a scheduled 14-day launch plan: intake, investment options, mind map, schedule, check-ins, and final review.' },
+  '/methodology':  { file:'methodology',  title:'Methodology — the left-brain / right-brain launch map', desc:'Launch Engine maps launch work onto two hemispheres: the left is the material build, the right is the immaterial market, joined by a balance score.' },
+  '/faq':          { file:'faq',          title:'Launch Engine FAQ', desc:'What Launch Engine is, who it is for, how long the plan is, and how it differs from a generic planner.' },
+  '/pricing':      { file:'pricing',      title:'Launch Engine pricing & access', desc:'Early-access status and pricing for Launch Engine, the AI launch co-pilot.' },
+  '/glossary':     { file:'glossary',     title:'Launch Engine glossary', desc:'Plain definitions of the ideas Launch Engine is built on: launch co-pilot, action-generation, the brain hemispheres, and the balance score.' },
+};
+const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+async function renderPage(pathname, meta) {
+  const [shell, content] = await Promise.all([
+    readFile(join(ROOT, 'site', 'shell.html'), 'utf8'),
+    readFile(join(ROOT, 'site', 'pages', `${meta.file}.html`), 'utf8'),
+  ]);
+  let headExtra = '';
+  try { headExtra = await readFile(join(ROOT, 'site', 'pages', `${meta.file}.jsonld`), 'utf8'); } catch { /* optional until phase 2 */ }
+  // Function replacements so a literal $ in content/meta is never treated as a
+  // replacement pattern ($&, $1, ...).
+  return shell
+    .replaceAll('{{TITLE}}', () => escHtml(meta.title))
+    .replaceAll('{{DESC}}', () => escHtml(meta.desc))
+    .replaceAll('{{CANONICAL}}', () => SITE_ORIGIN + (pathname === '/' ? '/' : pathname))
+    .replaceAll('{{PATH}}', () => pathname)
+    .replaceAll('{{YEAR}}', () => PAGE_YEAR)
+    .replace('{{HEAD_EXTRA}}', () => headExtra)
+    .replace('{{CONTENT}}', () => content);
+}
 
 // Phrase Lab measurement runs go through the RAW OpenRouter API — no CLI wrapper injecting
 // a system prompt we can't hold constant (methodology §2). Key lives ONLY in env, never the repo.
@@ -235,8 +272,29 @@ createServer(async (req, res) => {
     } catch (e) { return sendJSON(res, 500, { error: e.message }); }
   }
 
-  // ---- static ----
-  const rel = (url.pathname === '/' ? '/mindmap.html' : url.pathname);
+  // ---- public pages (GEO docs), server-rendered from site/shell.html ----
+  if (req.method === 'GET') {
+    let p = url.pathname;
+    if (p.length > 1 && p.endsWith('/')) p = p.slice(0, -1); // normalize trailing slash
+    if (PAGES[p]) {
+      try {
+        const html = await renderPage(p, PAGES[p]);
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        return res.end(html);
+      } catch { res.writeHead(500); return res.end('render error'); }
+    }
+    // The app itself now lives at /app (API-gated); / is the public landing.
+    if (p === '/app') {
+      try {
+        const data = await readFile(join(ROOT, 'mindmap.html'));
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        return res.end(data);
+      } catch { res.writeHead(404); return res.end('not found'); }
+    }
+  }
+
+  // ---- static (assets, robots.txt, sitemap.xml, llms.txt, /data, images) ----
+  const rel = url.pathname;
   const file = normalize(join(ROOT, rel));
   if (!file.startsWith(ROOT)) { res.writeHead(403); return res.end(); }
   try {
@@ -246,6 +304,7 @@ createServer(async (req, res) => {
   } catch { res.writeHead(404); res.end('not found'); }
 }).listen(PORT, async () => {
   console.log(`Launch Engine → http://localhost:${PORT}`);
+  console.log(`  public site  → / ${Object.keys(PAGES).filter(p => p !== '/').join(' ')}  (app moved to /app)`);
   console.log(`  proxying /api/claude → ${SIDECAR}/claude${SECRET ? ' (auth on)' : ''}`);
   console.log(`  proxying /api/raw    → openrouter.ai (${OPENROUTER_KEY ? `key set, model ${OPENROUTER_MODEL}` : 'NO KEY — set OPENROUTER_API_KEY'})`);
   console.log(`  password gate: ${APP_PASSWORD ? 'ON' : 'OFF (set APP_PASSWORD to enable)'}`);

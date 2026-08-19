@@ -1,0 +1,16 @@
+# Launch Engine
+
+> An AI launch co-pilot that turns a product, a goal, a two-week timeline, and a budget into a prioritized, scheduled to-do list of concrete build and market actions — and keeps it current as the work gets done. It generates actions; it does not grade the idea or the founder.
+
+## Docs
+
+- [What is Launch Engine](https://runway.pathwriter.world/): the product in one line, who it's for, and the core idea.
+- [How it works](https://runway.pathwriter.world/how-it-works): the six stages from intake to launch.
+- [Methodology](https://runway.pathwriter.world/methodology): the left-brain (build) / right-brain (market) map and the corpus-callosum balance.
+- [FAQ](https://runway.pathwriter.world/faq): common questions about what it is, who it's for, and how it differs from a generic planner.
+- [Pricing](https://runway.pathwriter.world/pricing): access and early-access status.
+- [Glossary](https://runway.pathwriter.world/glossary): definitions of the terms the product is built on.
+
+## Notes
+
+- The application itself is at /app and is access-gated; the pages above are the public documentation.

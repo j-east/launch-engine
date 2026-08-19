@@ -1,0 +1,35 @@
+# Launch Engine — runway.pathwriter.world
+# Public docs are open to all crawlers, including AI/answer-engine crawlers,
+# so the product can appear in AI Overviews and generative summaries.
+# The app itself lives under /app and is API-gated; nothing to crawl there.
+
+User-agent: *
+Allow: /$
+Allow: /how-it-works
+Allow: /methodology
+Allow: /faq
+Allow: /pricing
+Allow: /glossary
+Disallow: /api/
+Disallow: /data/
+Disallow: /app
+
+# AI / answer-engine crawlers — explicitly allowed (see DECISION note in the
+# Open Shannon phase: allowing these is what makes the site eligible for AI
+# summaries; the trade is that public copy may feed model training).
+User-agent: Google-Extended
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+Sitemap: https://runway.pathwriter.world/sitemap.xml

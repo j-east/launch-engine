@@ -108,9 +108,12 @@ const snip = (s, n = 300) => String(s ?? '').replace(/\s+/g, ' ').trim().slice(0
 // ---- rate limiting (in-memory, per-IP fixed window + global backstop) ----
 // No external store: this is a single container, so a Map is enough. Behind
 // Coolify/Traefik the real client is the left-most X-Forwarded-For entry.
+// Cloudflare fronts the site and Traefik overwrites X-Forwarded-For with the CF
+// edge IP, so prefer CF-Connecting-IP (passed through untouched) for the real client.
 const clientIp = req => {
+  const cf = String(req.headers['cf-connecting-ip'] || '').trim();
   const xff = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
-  return xff || req.socket?.remoteAddress || 'unknown';
+  return cf || xff || req.socket?.remoteAddress || 'unknown';
 };
 const buckets = new Map(); // key -> { count, resetAt }
 function hit(key, max, windowMs) {

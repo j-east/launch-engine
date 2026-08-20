@@ -100,6 +100,11 @@ const sendJSON = (res, status, data) => {
   res.writeHead(status, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(data));
 };
 
+// ---- logging: one line per /api request plus anything non-2xx, so prod logs
+// (Coolify → docker logs) show what actually happened. Static 2xx are skipped.
+const log = (tag, msg) => console.log(`${new Date().toISOString()} [${tag}] ${msg}`);
+const snip = (s, n = 300) => String(s ?? '').replace(/\s+/g, ' ').trim().slice(0, n);
+
 // ---- rate limiting (in-memory, per-IP fixed window + global backstop) ----
 // No external store: this is a single container, so a Map is enough. Behind
 // Coolify/Traefik the real client is the left-most X-Forwarded-For entry.
@@ -150,12 +155,27 @@ function proxyClaude(reqBody, res) {
   });
   const headers = { 'Content-Type':'application/json', 'Content-Length': Buffer.byteLength(out) };
   if (SECRET) headers.Authorization = `Bearer ${SECRET}`;
+  const t0 = Date.now();
+  log('claude', `→ sidecar prompt=${Buffer.byteLength(payload.prompt || '')}b system=${Buffer.byteLength(payload.system || '')}b maxTurns=${payload.maxTurns ?? 1}${payload.model ? ' model=' + payload.model : ''}`);
   const pr = httpRequest(
     { hostname: u.hostname, port: u.port, path: u.pathname, method: 'POST', headers },
     pres => { let d=''; pres.on('data', c => d+=c);
-      pres.on('end', () => { res.writeHead(pres.statusCode ?? 502, {'Content-Type':'application/json'}); res.end(d); }); }
+      pres.on('end', () => {
+        const st = pres.statusCode ?? 502, ms = Date.now() - t0;
+        if (st >= 200 && st < 300) {
+          log('claude', `← ${st} ${ms}ms ${d.length}b`);
+          res.writeHead(st, {'Content-Type':'application/json'}); return res.end(d);
+        }
+        // Sidecar failure: claude exited non-zero (expired OAuth login, usage limit,
+        // bad model…). Log the real reason and return it as 503 JSON, not 502:
+        // Cloudflare swaps origin 502/504 for its own HTML error page, and the
+        // client then dies on "Unexpected token '<'" with no clue what happened.
+        let detail = d; try { const j = JSON.parse(d); detail = j.error || j.result || d; } catch {}
+        log('claude', `← ${st} ${ms}ms FAILED: ${snip(detail)}`);
+        sendJSON(res, 503, { error: `Co-pilot backend error (${st}): ${snip(detail, 500)}`, sidecarStatus: st });
+      }); }
   );
-  pr.on('error', e => { res.writeHead(502, {'Content-Type':'application/json'}); res.end(JSON.stringify({ error: e.message })); });
+  pr.on('error', e => { log('claude', `sidecar unreachable: ${e.code || e.message}`); sendJSON(res, 503, { error: `Co-pilot backend unreachable: ${e.code || e.message}` }); });
   pr.write(out); pr.end();
 }
 
@@ -178,31 +198,44 @@ function proxyOpenRouter(reqBody, res) {
     'Authorization': `Bearer ${OPENROUTER_KEY}`,
     'HTTP-Referer': 'https://runway.pathwriter.world', 'X-Title': 'Launch Engine · Phrase Lab',
   };
+  const t0 = Date.now();
+  // Upstream 4xx pass through; anything else becomes 503 (Cloudflare hides 502/504 bodies).
+  const failStatus = st => (st && st >= 400 && st !== 502 && st !== 504) ? st : 503;
   const pr = httpsRequest(
     { hostname:'openrouter.ai', path:'/api/v1/chat/completions', method:'POST', headers },
     pres => { let d=''; pres.on('data', c => d+=c); pres.on('end', () => {
+      const ms = Date.now() - t0;
       try {
         const j = JSON.parse(d);
         const txt = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
-        if (txt != null) return sendJSON(res, 200, { result: txt, model: j.model });
-        return sendJSON(res, (pres.statusCode && pres.statusCode >= 400) ? pres.statusCode : 502,
-          { error: (j && j.error && j.error.message) || d || 'no content' });
-      } catch (e) { return sendJSON(res, (pres.statusCode && pres.statusCode >= 400) ? pres.statusCode : 502, { error: d || e.message }); }
+        if (txt != null) { log('raw', `← ${pres.statusCode} ${ms}ms model=${j.model || '?'}`); return sendJSON(res, 200, { result: txt, model: j.model }); }
+        const err = (j && j.error && j.error.message) || d || 'no content';
+        log('raw', `← ${pres.statusCode} ${ms}ms FAILED: ${snip(err)}`);
+        return sendJSON(res, failStatus(pres.statusCode), { error: err });
+      } catch (e) {
+        log('raw', `← ${pres.statusCode} ${ms}ms non-JSON: ${snip(d || e.message)}`);
+        return sendJSON(res, failStatus(pres.statusCode), { error: d || e.message });
+      }
     }); }
   );
-  pr.on('error', e => sendJSON(res, 502, { error: e.message }));
+  pr.on('error', e => { log('raw', `openrouter unreachable: ${e.code || e.message}`); sendJSON(res, 503, { error: e.code || e.message }); });
   pr.write(body); pr.end();
 }
 
 createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
+  const t0 = Date.now(), ip = clientIp(req);
+  res.on('finish', () => {
+    if (url.pathname.startsWith('/api/') || res.statusCode >= 400)
+      log('req', `${req.method} ${url.pathname} ${res.statusCode} ${Date.now() - t0}ms ip=${ip}`);
+  });
 
   // ---- rate limiting: all /api routes, tier by cost, before any real work ----
   if (url.pathname.startsWith('/api/')) {
     const tier = url.pathname === '/api/login' ? RL.login
       : (url.pathname === '/api/claude' || url.pathname === '/api/raw') ? RL.llm
       : RL.default;
-    if (!enforceRate(res, clientIp(req), tier)) return;
+    if (!enforceRate(res, ip, tier)) return;
   }
 
   // ---- auth: login sets the cookie; everything else under /api requires it ----

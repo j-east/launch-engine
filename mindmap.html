@@ -1162,8 +1162,8 @@ function renderPlan(){
       </div>
       <div class="status ${lastStatus.cls}" id="pstatus">${esc(lastStatus.t)}</div>
     </div>
-    ${hemi('left','◧ Build','make the thing')}
     ${hemi('right','Market ◨','prove people want it')}
+    ${hemi('left','◧ Build','make the thing')}
   </div>`;
   planFlashIds.clear();
   box.querySelectorAll('[data-tstep]').forEach(b=>b.addEventListener('click',()=>{ const st=findStep(b.dataset.tstep), a=findStepArea(b.dataset.tstep); if(!st)return;

@@ -433,6 +433,68 @@
     .tasks{padding:18px 16px 70px;}
     .pane h2{font-size:21px;}
   }
+  /* ---- Plan view (list-first centerpiece) ---- */
+  .plan{max-width:900px;margin:0 auto;}
+  .plan-kick{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+  .plan-title{font-family:'Fraunces',serif;font-weight:500;font-size:34px;margin:8px 0 0;line-height:1.15;}
+  .plan-vision{color:var(--ink-2);font-size:15px;margin:10px 0 0;max-width:640px;line-height:1.5;}
+  .plan-metrics{display:flex;flex-wrap:wrap;gap:18px;margin-top:16px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+  .plan-metrics b{color:var(--ink);font-weight:600;}
+  .plan-quick{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:16px;}
+  .plan-quick .autotoggle{margin-left:auto;}
+  .plan-head .status{margin:12px 0 0;}
+  .plan-hemi{margin-top:34px;}
+  .plan-hh{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-size:20px;font-weight:500;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:14px;}
+  .plan-hh .pip{width:11px;height:11px;border-radius:3px;}
+  .plan-hsub{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;margin-left:4px;}
+  .parea{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px 14px;margin-bottom:12px;}
+  .parea.pruned{opacity:.55;padding:12px 18px;}
+  .parea.flash{animation:itemflash 1.9s ease-out;}
+  .pa-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .pa-head h2{font-size:17px;font-weight:600;margin:0;}
+  .pa-head .pip{width:10px;height:10px;border-radius:3px;flex:none;}
+  .pa-sub{font-family:var(--mono);font-size:11px;color:var(--muted);}
+  .pa-ct{font-family:var(--mono);font-size:11px;color:var(--faint);margin-left:auto;}
+  .pa-restore{background:none;border:1px solid var(--line);color:var(--muted);font-family:var(--mono);font-size:11px;border-radius:7px;padding:4px 9px;cursor:pointer;}
+  .pa-restore:hover{color:var(--ink);border-color:var(--idea);}
+  .pa-desc{color:var(--ink-2);font-size:13.5px;margin:8px 0 0;line-height:1.5;}
+  .pa-steps{margin-top:12px;}
+  .pa-ilab{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:16px 0 4px;}
+  .prow{padding:10px 0 4px;border-top:1px solid var(--line);}
+  .prow.item15{padding:7px 0 2px;}
+  .prow.flash{animation:itemflash 1.9s ease-out;border-radius:8px;box-shadow:inset 2px 0 0 var(--idea);}
+  .pr-main{display:flex;align-items:flex-start;gap:11px;}
+  .prow .box{width:18px;height:18px;border-radius:5px;border:1.6px solid var(--faint);flex:none;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;}
+  .prow .box:hover{border-color:var(--ink-2);}
+  .prow.done .box{background:var(--done);border-color:var(--done);}
+  .prow .box svg{width:11px;height:11px;opacity:0;}
+  .prow.done .box svg{opacity:1;}
+  .pr-body{flex:1;min-width:0;}
+  .pr-t{font-size:15px;line-height:1.4;}
+  .prow.item15 .pr-t{font-size:14px;}
+  .prow.done .pr-t{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--faint);}
+  .pr-meta{display:flex;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px;}
+  .pr-prio{text-transform:uppercase;letter-spacing:.08em;font-weight:700;}
+  .pr-prio.hi{color:var(--hi);} .pr-prio.med{color:var(--med);} .pr-prio.lo{color:var(--lo);}
+  .pr-desc{color:var(--ink-2);font-size:13px;margin-top:4px;line-height:1.5;}
+  .pr-exp{margin-top:6px;}
+  .pr-thread{margin:8px 0 4px 29px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);}
+  .pr-gen{font-size:12.5px;color:var(--idea);margin-bottom:8px;line-height:1.45;}
+  .pr-msgs{display:flex;flex-direction:column;gap:10px;}
+  .pr-msgs .msg{max-width:100%;}
+  .pr-sg{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+  .pr-sg:empty{display:none;}
+  .pr-sg .chip-q{width:auto;flex:1 1 100%;}
+  .pr-compose{display:flex;align-items:flex-end;gap:6px;margin:4px 0 0 29px;}
+  .pr-compose textarea{flex:1;background:transparent;border:1px solid transparent;border-radius:8px;padding:5px 8px;color:var(--ink);font-family:inherit;font-size:13px;line-height:1.4;resize:none;outline:none;min-height:28px;transition:.15s;}
+  .pr-compose textarea::placeholder{color:var(--faint);}
+  .pr-compose textarea:hover{border-color:var(--line);}
+  .pr-compose textarea:focus{border-color:var(--idea);background:var(--bg);}
+  .pr-open{background:none;border:1px solid transparent;color:var(--faint);font-family:var(--mono);font-size:11px;border-radius:7px;padding:4px 7px;cursor:pointer;height:28px;flex:none;}
+  .pr-open:hover,.pr-open.on{color:var(--idea);border-color:var(--line);}
+  .pa-chat{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);}
+  .pa-chat .pr-thread,.pa-chat .pr-compose{margin-left:0;}
+  @media (max-width:820px){ .plan-title{font-size:26px;} .pr-thread,.pr-compose{margin-left:0;} .plan-quick .autotoggle{margin-left:0;} }
 </style>
 </head>
 <body>
@@ -574,8 +636,8 @@ function defAds(){ return {
 let flashIds=new Set();// ids of nodes/items just created or edited, to flash on next render
 let panSuppress=false; // true right after a drag-pan, to swallow the trailing click
 let bubbleXY=null;     // last node-bubble position (to refresh after edits)
-let stage='mindmap';
-const STAGES=[['intake','1 · Intake'],['invest','2 · Invest & Simulate'],['mindmap','3 · Mind Map'],['schedule','4 · Schedule'],['checkin','5 · Check-ins'],['report','6 · Report'],['phraselab','✷ Phrase Lab'],['adlab','◈ Ad Lab']];
+let stage='plan';
+const STAGES=[['intake','1 · Intake'],['invest','2 · Invest & Simulate'],['plan','3 · Plan'],['schedule','4 · Schedule'],['checkin','5 · Check-ins'],['report','6 · Report'],['mindmap','◌ Mind Map'],['phraselab','✷ Phrase Lab'],['adlab','◈ Ad Lab']];
 // URL ↔ tab: slug derived from the tab label so it always matches (e.g. "2 · Invest & Simulate" → "invest-simulate")
 const stageSlug=id=>{const e=STAGES.find(s=>s[0]===id);return e?e[1].replace(/^[^·]*·\s*/,'').trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''):id;};
 const slugStage=sl=>{const e=STAGES.find(s=>stageSlug(s[0])===sl);return e?e[0]:null;};
@@ -664,7 +726,7 @@ function buildMap(){
 
 const esc=s=>(s||'').replace(/[<&>"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
 let auto=true;
-function setStatus(t,cls){const e=$('#tstatus');if(e){e.textContent=t;e.className='status '+(cls||'');}}
+function setStatus(t,cls){lastStatus={t,cls:cls||''};['#tstatus','#pstatus'].forEach(q=>{const e=$(q);if(e){e.textContent=t;e.className='status '+(cls||'');}});}
 function renderTasks(){
   const box=$('#tgroups'); if(!box) return;
   box.innerHTML=AREAS.map(a=>{
@@ -701,7 +763,7 @@ async function replan(event){
   try{
     const reply=await askClaude(SYSTEM,prompt);
     const applied=(reply.actions||[]).map(applyAction).filter(Boolean);
-    buildMap(); if(applied.length){ applyFlash(); touch(); }
+    buildMap(); if(applied.length){ applyFlash(); touch(); } renderPlan(); if(stage==='mindmap') renderTasks();
     setStatus(applied.length?`✓ ${trunc(reply.message||'updated',70)} · ${applied.join(', ')}`:`✓ ${trunc(reply.message||'no changes',90)}`,'ok');
   }catch(e){ setStatus('⚠ '+e.message,'err'); }
 }
@@ -819,11 +881,12 @@ function findItemArea(id){return AREAS.find(a=>(a.items||[]).some(x=>x.id===id))
 function renderSide(){
   if(sel.type==='area'&&!AREAS.find(x=>x.id===sel.id)) sel={type:'global'};
   if(sel.type==='step'&&!findStep(sel.id)) sel={type:'global'};
+  if(sel.type==='item'&&!findItem(sel.id)) sel={type:'global'};
   return renderChat();
 }
 function select(s){sel=s;buildMap();renderSide();}
 // each focus (global / vision / area / step) keeps its own conversation thread
-function focusKey(){ return sel.type==='area'?'area:'+sel.id : sel.type==='step'?'step:'+sel.id : sel.type==='vision'?'vision':'global'; }
+function focusKey(){ return sel.type==='area'?'area:'+sel.id : sel.type==='step'?'step:'+sel.id : sel.type==='item'?'item:'+sel.id : sel.type==='vision'?'vision':'global'; }
 function curChat(){ const k=focusKey(); return CHATS[k]||(CHATS[k]=[]); }
 // last ~maxWords of a thread, oldest trimmed, as a labelled transcript for the prompt
 function transcriptFor(thread,maxWords){
@@ -852,7 +915,7 @@ async function ensureNodeGen(){
   const node=focusedNode(); if(!node) return;
   const sig=nodeSig(node);
   if((node.gen&&node.gen.sig===sig) || genBusy.has(node.id)) return;   // fresh or already running
-  genBusy.add(node.id); renderChat();
+  genBusy.add(node.id); renderChat(); renderPlan();
   const kind=node.steps?'area':'step';
   const sys=`You are a launch co-pilot. For the given ${kind}, return ONLY a JSON object (no prose, no fences): {"detail":"<1-2 sentences naming the key DECISION to make here, or what 'done' looks like — concrete and real-world>","question":"<one sharp question whose answer unblocks the founder and points to a concrete next step>"}. Warm and momentum-building.`;
   const prompt=`PRODUCT: ${NAME} — ${VISION}\n${kind.toUpperCase()}: "${node.t}" — ${node.desc||''}\nFULL PLAN:\n${mapState()}`;
@@ -860,12 +923,14 @@ async function ensureNodeGen(){
   node.gen={ detail:(obj&&obj.detail)||'', q:(obj&&obj.question)||'', sig };
   genBusy.delete(node.id); touch();
   if(focusedNode()===node){ renderChat(); if(expandedArea===node.id) buildMap(); else if(bubbleXY) showBubble(bubbleXY.x,bubbleXY.y); }
+  renderPlan();
 }
-function focusTitle(){ if(sel.type==='vision')return NAME; if(sel.type==='area'){const a=AREAS.find(x=>x.id===sel.id);return a?a.t:'';} const st=findStep(sel.id);return st?st.t:''; }
+function focusTitle(){ if(sel.type==='vision')return NAME; if(sel.type==='area'){const a=AREAS.find(x=>x.id===sel.id);return a?a.t:'';} if(sel.type==='item'){const it=findItem(sel.id);return it?it.t:'';} const st=findStep(sel.id);return st?st.t:''; }
 function focusLine(){
   if(sel.type==='vision') return `\nFOCUSED NODE: the vision.`;
   if(sel.type==='area'){const a=AREAS.find(x=>x.id===sel.id);return a?`\nFOCUSED NODE: area "${a.t}" (id ${a.id}) — ${a.desc||''}`:'';}
   if(sel.type==='step'){const st=findStep(sel.id);return st?`\nFOCUSED NODE: step "${st.t}" (id ${sel.id}).`:'';}
+  if(sel.type==='item'){const it=findItem(sel.id),a=findItemArea(sel.id);return it?`\nFOCUSED NODE: 15-min action item "${it.t}" (itemId ${sel.id}) in area "${a?a.t:''}" (areaId ${a?a.id:''}).`:'';}
   return '';
 }
 function saveDesc(v){ if(sel.type==='vision')VISION=v; else if(sel.type==='area'){const a=AREAS.find(x=>x.id===sel.id);if(a)a.desc=v;} else {const st=findStep(sel.id);if(st)st.desc=v;} touch(); }
@@ -880,7 +945,7 @@ function experimentHTML(st,a){
   return `<div class="exp">${rows.join('')}<button class="bub-pr" id="bpr">${verb}</button></div>`;
 }
 function showBubble(x,y){
-  const b=$('#bubble'); if(sel.type==='global'){b.style.display='none';return;}
+  const b=$('#bubble'); if(sel.type==='global'||sel.type==='item'){b.style.display='none';return;}
   let title,tag,desc,meta,col,off,detail='',exp='';
   if(sel.type==='vision'){title=NAME;tag='the vision';col='#C9A8E0';desc=VISION;meta='';off=58;}
   else if(sel.type==='area'){const a=AREAS.find(x=>x.id===sel.id);title=a.t;tag=(a.h==='left'?'build':'market')+' · area';col=HCOL[a.h];desc=a.desc||'';meta=`${a.steps.length} steps · ${(a.items||[]).length} 15-min items`;detail=(a.gen&&a.gen.detail)||'';off=56;}
@@ -905,7 +970,7 @@ function showBubble(x,y){
       '📈 posting a result…'); });
 }
 
-const linkifyMM=h=>h.replace(/Mind Map/g,'<a class="mmlink" data-mm>Mind Map</a>');
+const linkifyMM=h=>h.replace(/Mind Map/g,'<a class="mmlink" data-go="mindmap">Mind Map</a>').replace(/Plan tab/g,'<a class="mmlink" data-go="plan">Plan tab</a>');
 const renderMsg=m=>m.role==='sys'?`<div class="msg sys">${esc(m.text)}</div>`:m.role==='u'?`<div class="msg u">${esc(m.text)}</div>`:`<div class="msg a"><div class="who">Claude</div>${linkifyMM(esc(m.text))}</div>`;
 // queued, node-specific prompts — the "next move" so a click never lands on a blank page
 function suggestions(){
@@ -923,6 +988,13 @@ function suggestions(){
       build
         ? {l:'Spec for Claude / a dev',p:`For "${a?a.t:''}", write the precise tasks/spec I'd hand to Claude or a developer to build first — concrete and buildable.`}
         : {l:'Draft the first thing',p:`For "${a?a.t:''}", draft the very first concrete asset (the landing-page headline, the first DM, the first ad hook) so I can ship it today.`},
+    ];
+  }
+  if(sel.type==='item'){ const it=findItem(sel.id); const t=it?it.t:'';
+    return [
+      {l:'Walk me through it',p:`Walk me through doing "${t}" right now — the exact tool, clicks, and what "done" looks like. Essentials only.`},
+      {l:'Too big — split it',p:`"${t}" feels bigger than 15 minutes. Split it into 2-3 smaller items (addItem) and edit or delete the original so nothing is duplicated.`},
+      {l:'Done — what\'s next?',p:`I finished "${t}". Mark it done with toggleItem and add the next 1-2 fifteen-minute items for this area.`},
     ];
   }
   const st=findStep(sel.id), sa=findStepArea(sel.id), market=sa&&sa.h==='right';
@@ -971,18 +1043,154 @@ function renderChat(){
 async function globalSend(text,busy,display){
   const thread=curChat();
   thread.push({role:'u',text:display||text});
-  thread.push({role:'sys',text:busy||'…thinking'}); renderSide();
+  thread.push({role:'sys',text:busy||'…thinking'}); renderSide(); renderPlan();
   try{
     const hist=transcriptFor(thread,20000);   // ~20k-word lookback for this node's thread
     const reply=await askClaude(SYSTEM,`MAP STATE:\n${mapState()}${focusLine()}\n\nCONVERSATION SO FAR (this thread — reply to the last Founder line):\n${hist}`);
     thread.pop(); thread.push({role:'a',text:(reply.message||'(done)')+''});
     const applied=(reply.actions||[]).map(applyAction).filter(Boolean);
-    if(applied.length){ thread.push({role:'sys',text:'⚙ '+applied.join(' · ')}); buildMap(); applyFlash(); }
+    if(applied.length){ thread.push({role:'sys',text:'⚙ '+applied.join(' · ')}); buildMap(); applyFlash(); if(stage==='mindmap') renderTasks(); }
     if(thread.length>200) thread.splice(0,thread.length-200);   // soft cap on stored history
     touch();
   }catch(e){ thread.pop(); thread.push({role:'a',text:'⚠ proxy error: '+e.message+' — is server.mjs running?'}); }
-  renderSide();
+  renderSide(); renderPlan();
   if(sel.type!=='global'&&bubbleXY) showBubble(bubbleXY.x,bubbleXY.y);
+}
+
+// ---------- Plan view: the list-first centerpiece ----------
+// Areas → steps → 15-minute items, one column. Every row carries its own co-pilot thread
+// (the same CHATS[focusKey] threads the mind-map bubble uses), so "chat about this" digs into
+// exactly one node and the co-pilot can edit the plan in place via the normal action tools.
+let openChats=new Set();      // focus keys whose inline thread is expanded (transient)
+let planDrafts={};            // unsent composer text per focus key — survives re-renders
+let planFocusKey=null;        // one-shot: composer to focus after the next renderPlan
+let planFlashIds=new Set();   // ids to flash on the next renderPlan (fed by applyFlash)
+let lastStatus={t:'ready',cls:''};
+const BOXSVG=`<svg viewBox="0 0 24 24" fill="none" stroke="#0E0F12" stroke-width="3.4"><path d="M5 13l4 4L19 7"/></svg>`;
+function keyToSel(k){ const i=k.indexOf(':'); return i<0?{type:k}:{type:k.slice(0,i),id:k.slice(i+1)}; }
+// run fn with sel temporarily pointed at a focus key (suggestions()/focusedNode() read sel)
+function withSel(key,fn){ const prev=sel; sel=keyToSel(key); try{ return fn(); } finally{ sel=prev; } }
+function planSend(key,text,display){
+  if(!text) return;
+  sel=keyToSel(key); openChats.add(key); delete planDrafts[key]; planFocusKey=key;
+  return globalSend(text,null,display);
+}
+function togglePlanChat(key){
+  if(openChats.has(key)) openChats.delete(key);
+  else { openChats.add(key); sel=keyToSel(key); renderSide(); if(sel.type==='area'||sel.type==='step') ensureNodeGen(); planFocusKey=key; }
+  renderPlan();
+}
+function planThreadHTML(key,placeholder){
+  const thread=CHATS[key]||[]; const open=openChats.has(key); const n=thread.filter(m=>m.role!=='sys').length;
+  const last=thread[thread.length-1]; const busy=!!last&&last.role==='sys'&&!/^⚙/.test(last.text);
+  let body='';
+  if(open||busy){
+    const {sgs,gq,gd,gbusy}=withSel(key,()=>{ const f=focusedNode(); return {sgs:suggestions(),gq:f&&f.gen&&f.gen.q,gd:f&&f.gen&&f.gen.detail,gbusy:f&&genBusy.has(f.id)}; });
+    body=`<div class="pr-thread">
+      ${gd?`<div class="pr-gen">→ ${esc(gd)}</div>`:''}
+      ${thread.length?`<div class="pr-msgs">${thread.map(renderMsg).join('')}</div>`:''}
+      <div class="pr-sg">
+        ${gbusy?`<span class="chip-q busy">✨ thinking through this…</span>`:gq?`<button class="chip-q" data-gq="${esc(key)}">💡 ${esc(gq)}</button>`:''}
+        ${sgs.map((x,i)=>`<button class="chip-sg" data-sg="${i}" data-key="${esc(key)}">${esc(x.l)}</button>`).join('')}
+      </div></div>`;
+  }
+  return `${body}<div class="pr-compose"><textarea class="pr-inp" rows="1" data-key="${esc(key)}" placeholder="${esc(placeholder||'Chat about this…')}">${esc(planDrafts[key]||'')}</textarea><button class="pr-open ${open?'on':''}" data-open="${esc(key)}" title="${open?'hide this thread':'show this thread'}">💬${n?' '+n:''}</button></div>`;
+}
+function planStepHTML(a,st){
+  const market=a.h==='right';
+  const ex=[]; if(market&&st.bet)ex.push(['bet',st.bet]); if(market&&st.watch)ex.push(['watch',st.watch]); if(st.result)ex.push(['result',st.result]); if(st.learning)ex.push(['means',st.learning]);
+  return `<div class="prow step ${st.done?'done':''} ${planFlashIds.has(st.id)?'flash':''}" data-id="${st.id}">
+    <div class="pr-main"><span class="box" data-tstep="${st.id}">${BOXSVG}</span>
+      <div class="pr-body">
+        <div class="pr-t">${esc(st.t)}</div>
+        <div class="pr-meta"><span class="pr-prio ${st.prio}">${st.prio}</span><span>${st.hrs}h</span>${st.cost?`<span>${st.cost}</span>`:''}<span>${market?'experiment':'build'}</span></div>
+        ${st.desc?`<div class="pr-desc">${esc(st.desc)}</div>`:''}
+        ${ex.length?`<div class="pr-exp">${ex.map(([k,v])=>`<div class="exp-r ${k==='result'?'res':''}"><span class="exp-k">${k}</span>${esc(v)}</div>`).join('')}</div>`:''}
+      </div></div>
+    ${planThreadHTML('step:'+st.id)}
+  </div>`;
+}
+function planItemHTML(a,it){
+  return `<div class="prow item15 ${it.done?'done':''} ${planFlashIds.has(it.id)?'flash':''}" data-id="${it.id}">
+    <div class="pr-main"><span class="box" data-titem="${it.id}">${BOXSVG}</span>
+      <div class="pr-body"><div class="pr-t">${esc(it.t)}</div>${it.notes?`<div class="pr-desc">${esc(it.notes)}</div>`:''}</div></div>
+    ${planThreadHTML('item:'+it.id)}
+  </div>`;
+}
+function planAreaHTML(a){
+  const items=a.items||[], sd=a.steps.filter(s=>s.done).length, idn=items.filter(i=>i.done).length;
+  if(a.pruned) return `<section class="parea pruned" data-id="${a.id}">
+      <div class="pa-head"><span class="pip" style="background:${HCOL[a.h]}"></span><h2>${esc(a.t)}</h2><span class="pa-ct">pruned</span><button class="pa-restore" data-restore="${a.id}">↩ bring back</button></div>
+      ${a.prune?`<p class="pa-desc">${esc(a.prune)}</p>`:''}
+    </section>`;
+  return `<section class="parea ${planFlashIds.has(a.id)?'flash':''}" data-id="${a.id}">
+    <div class="pa-head"><span class="pip" style="background:${HCOL[a.h]}"></span><h2>${esc(a.t)}</h2><span class="pa-sub">${esc(a.sub||'')}</span><span class="pa-ct">${sd}/${a.steps.length} steps · ${idn}/${items.length} items</span></div>
+    ${a.desc?`<p class="pa-desc">${esc(a.desc)}</p>`:''}
+    <div class="pa-steps">${a.steps.length?a.steps.map(st=>planStepHTML(a,st)).join(''):`<div class="emptyg">No steps yet — ask below and the co-pilot will add them.</div>`}</div>
+    <div class="pa-ilab">15-minute actions</div>
+    <div class="pa-items">${items.length?items.map(it=>planItemHTML(a,it)).join(''):`<div class="emptyg">No 15-min tasks yet.</div>`}</div>
+    <button class="additem" data-area="${a.id}">＋ ask co-pilot for 15-min tasks</button>
+    <div class="pa-chat">${planThreadHTML('area:'+a.id,`Chat about “${a.t}”…`)}</div>
+  </section>`;
+}
+function renderPlan(){
+  if(stage!=='plan') return;
+  const box=$('#stub'); if(!box) return;
+  const main=$('#main'), top=main?main.scrollTop:0;
+  // remember which composer (if any) had focus so a re-render mid-typing is invisible
+  const ae=document.activeElement; let fk=planFocusKey, caret=-1;
+  if(!fk && ae && ae.classList && ae.classList.contains('pr-inp')){ fk=ae.dataset.key; caret=ae.selectionStart; }
+  planFocusKey=null;
+  const T=planTotals();
+  const steps=AREAS.flatMap(a=>a.pruned?[]:a.steps), items=AREAS.flatMap(a=>a.pruned?[]:(a.items||[]));
+  const hemi=(h,label,sub)=>`<div class="plan-hemi"><div class="plan-hh"><span class="pip" style="background:${HCOL[h]}"></span><span>${label}</span><span class="plan-hsub">${sub}</span></div>${AREAS.filter(a=>a.h===h).map(planAreaHTML).join('')}</div>`;
+  box.innerHTML=`<div class="plan">
+    <div class="plan-head">
+      <div class="plan-kick">2-week launch plan</div>
+      <h1 class="plan-title">${esc(NAME)}</h1>
+      ${VISION?`<p class="plan-vision">${esc(VISION)}</p>`:''}
+      <div class="plan-metrics">
+        <span><b>${steps.filter(s=>s.done).length}/${steps.length}</b> steps done</span>
+        <span><b>${items.filter(i=>i.done).length}/${items.length}</b> 15-min items done</span>
+        <span><b>${T.hrs}h</b> left of ${BUDGET.timeHrs}h</span>
+        <span><b>${T.cost}</b> left of ${BUDGET.money}</span>
+      </div>
+      <div class="plan-quick">
+        <button class="tool" id="p_starter">✨ Generate starter plan</button>
+        <button class="tool" id="p_next">➤ What next?</button>
+        <label class="autotoggle" title="When on, checking things off triggers Claude to re-plan"><input type="checkbox" id="pauto" ${auto?'checked':''}/> auto re-plan</label>
+      </div>
+      <div class="status ${lastStatus.cls}" id="pstatus">${esc(lastStatus.t)}</div>
+    </div>
+    ${hemi('left','◧ Build','make the thing')}
+    ${hemi('right','Market ◨','prove people want it')}
+  </div>`;
+  planFlashIds.clear();
+  box.querySelectorAll('[data-tstep]').forEach(b=>b.addEventListener('click',()=>{ const st=findStep(b.dataset.tstep), a=findStepArea(b.dataset.tstep); if(!st)return;
+    st.done=!st.done; touch(); renderPlan();
+    replan(`Founder ${st.done?'completed':'reopened'} the step “${st.t}” in area “${a?a.t:''}”.${st.done&&!st.result?' No result is recorded yet — do not invent one; in your message ask what happened so it can be posted.':''}`); }));
+  box.querySelectorAll('[data-titem]').forEach(b=>b.addEventListener('click',()=>{ const it=findItem(b.dataset.titem); if(!it)return;
+    it.done=!it.done; touch(); renderPlan();
+    replan(`Founder ${it.done?'completed':'reopened'} the 15-min task “${it.t}” in area “${findItemArea(it.id)?.t||''}”.`); }));
+  box.querySelectorAll('[data-restore]').forEach(b=>b.addEventListener('click',()=>{ const a=AREAS.find(x=>x.id===b.dataset.restore); if(a){ a.pruned=false; touch(); renderPlan(); buildMap(); } }));
+  box.querySelectorAll('.additem').forEach(b=>b.addEventListener('click',()=>{ const a=AREAS.find(x=>x.id===b.dataset.area);
+    if(a) planSend('area:'+a.id,`Break the area “${a.t}” into 4-6 concrete 15-minute action items via addItem — each doable in ~15 min, complete, and momentum-building.`,'＋ 15-min tasks for this area'); }));
+  box.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>togglePlanChat(b.dataset.open)));
+  box.querySelectorAll('.chip-sg').forEach(b=>b.addEventListener('click',()=>{ const key=b.dataset.key; const s=withSel(key,()=>suggestions()[+b.dataset.sg]); if(s) planSend(key,s.p,s.l); }));
+  box.querySelectorAll('[data-gq]').forEach(b=>b.addEventListener('click',()=>{ const key=b.dataset.gq; const q=withSel(key,()=>{ const n=focusedNode(); return n&&n.gen&&n.gen.q; });
+    if(q) planSend(key,`Help me work through this and turn it into concrete next steps: "${q}"`,'💡 '+trunc(q,70)); }));
+  box.querySelectorAll('.pr-inp').forEach(inp=>{
+    const key=inp.dataset.key;
+    const grow=()=>{ inp.style.height='auto'; inp.style.height=Math.min(inp.scrollHeight,140)+'px'; };
+    inp.addEventListener('input',()=>{ planDrafts[key]=inp.value; grow(); });
+    inp.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); const v=inp.value.trim(); if(v){ inp.value=''; planSend(key,v); } } });
+    if(inp.value) grow();
+  });
+  $('#p_starter').addEventListener('click',()=>{ sel={type:'global'}; globalSend("Build out a complete first-draft launch plan for this product. Ensure every non-pruned area has 2-4 concrete steps and 3-5 fifteen-minute action items, and give each area a one-sentence desc. Prune anything not worth doing in a 2-week launch. Be thorough — emit many actions.","✨ generating starter plan…","✨ Generate a starter plan"); });
+  $('#p_next').addEventListener('click',()=>{ sel={type:'global'}; globalSend("Looking at the whole plan, what are the 3 highest-leverage things to do next? Reprioritise or add items if useful.","…thinking","What should I do next?"); });
+  $('#pauto').addEventListener('change',e=>{ auto=e.target.checked; const o=$('#auto'); if(o) o.checked=auto; });
+  if(main) main.scrollTop=top;
+  if(fk){ const el=box.querySelector('.pr-inp[data-key="'+CSS.escape(fk)+'"]'); if(el){ el.focus({preventScroll:true}); const p=caret>=0?Math.min(caret,el.value.length):el.value.length; try{ el.setSelectionRange(p,p); }catch(_){} } }
 }
 
 // ---------- stage tabs ----------
@@ -996,13 +1204,15 @@ function applyStage(){
   $('#tasks').style.display=map?'block':'none';
   const stub=$('#stub'); stub.style.display=map?'none':'block';
   if(map) return;
+  bubbleXY=null; const bb=$('#bubble'); if(bb) bb.style.display='none';   // the bubble belongs to the map
+  if(stage==='plan') return renderPlan();
   if(stage==='intake') return renderIntake(stub);
   if(stage==='invest') return renderInvest(stub);
   if(stage==='schedule') return renderSchedule(stub);
   if(stage==='phraselab') return renderPhraseLab(stub);
   if(stage==='adlab') return renderAdLab(stub);
   const N={checkin:'Daily check-ins',report:'Final report'};
-  stub.innerHTML=`<div class="stubcard"><div class="stubn">${N[stage]}</div><p>Coming next. Intake, Invest and the Mind Map are working — these later stages will consume that plan.</p></div>`;
+  stub.innerHTML=`<div class="stubcard"><div class="stubn">${N[stage]}</div><p>Coming next. Intake, Invest and the Plan are working — these later stages will consume that plan.</p></div>`;
 }
 
 // shared agent runner (used by intake/invest action buttons)
@@ -1439,7 +1649,7 @@ Return ONLY JSON (no prose/fences): {"days":[{"day":1,"focus":"<3-5 word theme>"
   } else { st.textContent='⚠ Could not parse the schedule — try again.'; st.className='istatus err'; }
 }
 
-const SYSTEM=`You are a launch co-pilot embedded in a mind-map planning tool for a 2-week product launch. You can both TALK to the founder and EDIT the map by emitting actions.
+const SYSTEM=`You are a launch co-pilot embedded in a planning tool for a 2-week product launch (a plan list of areas → steps → 15-minute action items, with a mind-map view of the same data). You can both TALK to the founder and EDIT the plan by emitting actions.
 
 Respond with a SINGLE JSON object and nothing else — no markdown fences, no prose outside it:
 {"message":"<concise reply, under 90 words>","actions":[ {"tool":"<name>","args":{...}} ]}
@@ -1479,7 +1689,7 @@ BE CONCRETE & REAL-WORLD: name actual tools, accounts, downloads, registries, an
 
 const INTAKE_SYSTEM = SYSTEM + `
 
-INTAKE / INTERVIEW MODE: You are interviewing the founder to understand their product before building a launch plan. Ask 1-2 short, focused questions per turn — cover, over the conversation: what it is, who it's for, the core problem, why them/why now, current build state, where they're based (country/state, so entity/tax/legal steps are right), the goal, and rough time & money budget. Adapt to their answers and never re-ask what you already know. The founder may ask YOU questions — answer them helpfully, then gently continue. Record facts as you learn them with setIntake (and editVision for the vision/name). Do NOT build the full plan until the founder says they're ready (or you clearly have enough) — then emit MANY actions (areas, descs, steps, 15-min items), giving each MARKET step a bet + watch so it's a runnable experiment, and tell them to open the Mind Map. Keep messages warm, brief, and human.`;
+INTAKE / INTERVIEW MODE: You are interviewing the founder to understand their product before building a launch plan. Ask 1-2 short, focused questions per turn — cover, over the conversation: what it is, who it's for, the core problem, why them/why now, current build state, where they're based (country/state, so entity/tax/legal steps are right), the goal, and rough time & money budget. Adapt to their answers and never re-ask what you already know. The founder may ask YOU questions — answer them helpfully, then gently continue. Record facts as you learn them with setIntake (and editVision for the vision/name). Do NOT build the full plan until the founder says they're ready (or you clearly have enough) — then emit MANY actions (areas, descs, steps, 15-min items), giving each MARKET step a bet + watch so it's a runnable experiment, and tell them to open the Plan tab. Keep messages warm, brief, and human.`;
 
 function mapState(){return JSON.stringify({vision:VISION,budget:BUDGET,intake:INTAKE,
   schedule:(SCHEDULE.days||[]).map((d,i)=>({day:i+1,focus:d.focus||'',steps:(d.refs||[]).map(r=>findStep(r.id)?.t).filter(Boolean)})).filter(d=>d.steps.length),
@@ -1565,7 +1775,7 @@ function pulseRing(grp){
 }
 function applyFlash(){
   if(!flashIds.size) return;
-  const ids=[...flashIds]; flashIds.clear();
+  const ids=[...flashIds]; flashIds.clear(); ids.forEach(id=>planFlashIds.add(id));
   const nodesG=document.getElementById('nodes');
   ids.forEach(id=>{
     if(nodesG){ const g=nodesG.querySelector('[data-nid="'+id+'"]'); if(g){ g.classList.add('flash'); pulseRing(g); setTimeout(()=>g.classList.remove('flash'),1300); } }
@@ -1975,7 +2185,7 @@ function skeleton(name,vision){
 }
 function rerenderAll(){
   const b=$('#bubble'); if(b)b.style.display='none';
-  buildMap(); renderSide(); renderTasks();
+  buildMap(); renderSide(); renderTasks(); renderPlan();
   const mw=document.querySelector('.mapwrap');
   requestAnimationFrame(()=>{ mw.scrollLeft=Math.max(0, VIS.cx - mw.clientWidth/2); mw.scrollTop=Math.max(0, VIS.y - mw.clientHeight/2); });
 }
@@ -2147,7 +2357,7 @@ async function ensureAuth(){
 async function boot(){
   if(!await ensureAuth()) return;
   initDotField();
-  $('#auto').addEventListener('change',e=>auto=e.target.checked);
+  $('#auto').addEventListener('change',e=>{ auto=e.target.checked; const p=$('#pauto'); if(p) p.checked=auto; });
   $('#map').addEventListener('click',e=>{ if(panSuppress){panSuppress=false;return;} if(!e.target.closest('.node')) clearFocus(); });
   // drag-to-pan the map: grab on empty space, nodes/bubble keep their own pointer events
   (function(){
@@ -2174,7 +2384,7 @@ async function boot(){
   $('#xcopy').addEventListener('click',copyExport);
   $('#xmodal').addEventListener('click',e=>{ if(e.target===$('#xmodal')) closeExport(); });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeExport(); });
-  document.addEventListener('click',e=>{ if(e.target.closest('.mmlink')){ goStage('mindmap'); } });
+  document.addEventListener('click',e=>{ const l=e.target.closest('.mmlink'); if(l){ goStage(l.dataset.go||'mindmap'); } });
   $('#sidehandle').addEventListener('click',()=>setSide(document.body.classList.contains('side-closed')));
   if(window.innerWidth<=820) document.body.classList.add('side-closed');   // mobile: drawer starts hidden
   updateHandle();

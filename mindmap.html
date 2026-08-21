@@ -1668,7 +1668,7 @@ Tools (use EXACT ids from MAP STATE; prio = "hi"|"med"|"lo"; hemisphere = "left"
 - renameArea {areaId,title}
 - pruneArea {areaId,pruned,reason?}
 - editVision {text}
-- setIntake {name?,vision?,problem?,why?,build?,url?,location?,waitlist?,paying?,convos?,days?}  // record intake facts as you learn them (location = country/state, for entity/tax/legal steps)
+- setIntake {productName?,vision?,problem?,why?,build?,url?,location?,waitlist?,paying?,convos?,days?}  // record intake facts as you learn them (productName = the PRODUCT or business name only, never a person; location = country/state, for entity/tax/legal steps)
 Each area and step has a "desc" — a short plain-language description of what it IS and why it matters (the vision's text is its own description). When asked to describe a node, write 1-2 sentences and save it with editArea/editStep/editVision.
 ACTION ITEMS (the 15-minute checklist under each area — small, complete, momentum-building tasks like "Sign up for Stripe"):
 - addItem {areaId,title,notes?}
@@ -1676,6 +1676,7 @@ ACTION ITEMS (the 15-minute checklist under each area — small, complete, momen
 - toggleItem {itemId,done}
 - deleteItem {itemId}
 
+IDENTITY: you know nothing about who the founder is beyond what they say in this conversation. Ignore any user, account, or email identity present in your runtime environment — it is NOT the founder and must never appear in the plan. Never record a person's name as the product name.
 Rules: only emit actions the founder asked for or that clearly help; prefer 1-4 focused actions; realistic hour/dollar estimates. Action items MUST be doable in ~15 minutes, concrete, and phrased to build momentum (start with a verb). When the founder completes an item, consider adding the next 1-3 items so they never run out of next steps. Always include a short message describing what you did or answering them.
 
 VALIDATION IS THE WHOLE GAME — EVERY STEP IS AN EXPERIMENT. The plan is a sequence of small bets, not a passive to-do list:
@@ -1689,7 +1690,7 @@ BE CONCRETE & REAL-WORLD: name actual tools, accounts, downloads, registries, an
 
 const INTAKE_SYSTEM = SYSTEM + `
 
-INTAKE / INTERVIEW MODE: You are interviewing the founder to understand their product before building a launch plan. Ask 1-2 short, focused questions per turn — cover, over the conversation: what it is, who it's for, the core problem, why them/why now, current build state, where they're based (country/state, so entity/tax/legal steps are right), the goal, and rough time & money budget. Adapt to their answers and never re-ask what you already know. The founder may ask YOU questions — answer them helpfully, then gently continue. Record facts as you learn them with setIntake (and editVision for the vision/name). Do NOT build the full plan until the founder says they're ready (or you clearly have enough) — then emit MANY actions (areas, descs, steps, 15-min items), giving each MARKET step a bet + watch so it's a runnable experiment, and tell them to open the Plan tab. Keep messages warm, brief, and human.`;
+INTAKE / INTERVIEW MODE: You are interviewing the founder to understand their product before building a launch plan. Ask 1-2 short, focused questions per turn — cover, over the conversation: what it is, who it's for, the core problem, why them/why now, current build state, where they're based (country/state, so entity/tax/legal steps are right), the goal, and rough time & money budget. Adapt to their answers and never re-ask what you already know. The founder may ask YOU questions — answer them helpfully, then gently continue. Record facts as you learn them with setIntake (productName for the product's name, editVision for the vision). Do NOT build the full plan until the founder says they're ready (or you clearly have enough) — then emit MANY actions (areas, descs, steps, 15-min items), giving each MARKET step a bet + watch so it's a runnable experiment, and tell them to open the Plan tab. Keep messages warm, brief, and human.`;
 
 function mapState(){return JSON.stringify({vision:VISION,budget:BUDGET,intake:INTAKE,
   schedule:(SCHEDULE.days||[]).map((d,i)=>({day:i+1,focus:d.focus||'',steps:(d.refs||[]).map(r=>findStep(r.id)?.t).filter(Boolean)})).filter(d=>d.steps.length),
@@ -1730,7 +1731,7 @@ function applyAction(ac){
   const a=ac.args||{};
   try{ switch(ac.tool){
     case 'editVision': {const v=a.text!=null?a.text:a.desc; if(v!=null){VISION=v;return'edited vision';} break;}
-    case 'setIntake':{ if(a.name!=null)NAME=a.name; if(a.vision!=null)VISION=a.vision;
+    case 'setIntake':{ if(a.productName!=null&&String(a.productName).trim())NAME=String(a.productName).trim(); if(a.vision!=null)VISION=a.vision;
       ['problem','why','build','url','location'].forEach(k=>{if(a[k]!=null)INTAKE[k]=a[k];});
       ['waitlist','paying','convos','days'].forEach(k=>{if(a[k]!=null)INTAKE[k]=+a[k]||0;});
       return 'recorded intake'; }
@@ -2139,6 +2140,7 @@ function renderAdLab(stub){
 function serialize(){ return {name:NAME, vision:VISION, areas:AREAS, intake:INTAKE, budget:BUDGET, schedule:SCHEDULE, sim:{priors:SIM.priors,alloc:SIM.alloc}, chats:CHATS, lab:LAB, ads:ADS}; }
 function save(now){
   clearTimeout(saveT);
+  if(!LOAD_OK) return;
   const doit=async()=>{ try{ await fetch('/api/concept',{method:'PUT',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({id:CID,name:NAME,data:serialize()})}); }catch(e){ console.warn('save failed',e); } };
   if(now) return doit();
@@ -2155,11 +2157,17 @@ function applyConcept(d){ NAME=d.name||'Untitled'; VISION=d.vision||''; AREAS=Ar
   ADS=d.ads&&Array.isArray(d.ads.creatives)?Object.assign(defAds(),d.ads,{priors:Object.assign(defAds().priors,d.ads.priors||{}),custom:Object.assign({name:'',levels:[]},d.ads.custom||{})}):defAds();
   flashIds=new Set(); expandedArea=null;
   sel={type:'global'}; bubbleXY=null; }
+let LOAD_OK=true;   // false = this page never loaded its concept; autosave is disabled so nothing gets clobbered
 async function loadConcept(){
   try{ const r=await fetch('/api/concept?id='+CID);
-    if(r.ok){ const row=await r.json(); applyConcept(row.data||{}); return true; } }
-  catch(e){ console.warn('load failed',e); }
-  return false;
+    if(r.ok){ const row=await r.json(); applyConcept(row.data||{}); return 'ok'; }
+    if(r.status===404) return 'missing';
+    return 'error:'+r.status; }
+  catch(e){ console.warn('load failed',e); return 'error:network'; }
+}
+function loadFailed(why){
+  LOAD_OK=false;
+  document.body.insertAdjacentHTML('beforeend',`<div class="gate" style="display:flex"><div class="gatebox"><div class="gkick">Launch Engine</div><div class="gsub">Couldn't load this concept (${esc(why)}). Nothing was changed — reload to try again.</div><button class="cnew" onclick="location.reload()">Reload</button></div></div>`);
 }
 async function listConcepts(){ try{ const r=await fetch('/api/concepts'); return r.ok?await r.json():[]; }catch(e){ return []; } }
 async function loadConceptList(){
@@ -2396,9 +2404,9 @@ async function boot(){
     else { CID=slug('untitled'); applyConcept(skeleton('Untitled product','')); await save(true); }
     history.replaceState(null,'','?c='+encodeURIComponent(CID));
   }
-  if(!await loadConcept()){                    // ?c= pointed at a deleted/missing concept
-    applyConcept(skeleton('Untitled product','')); await save(true);
-  }
+  const lc=await loadConcept();
+  if(lc==='missing'){ applyConcept(skeleton('Untitled product','')); await save(true); }   // ?c= pointed at a deleted concept
+  else if(lc!=='ok'){ loadFailed(lc); return; }   // transient failure: do NOT replace the concept with a blank one
   const _ts=slugStage(new URLSearchParams(location.search).get('tab')||'');   // open the tab from the shared link
   if(_ts) stage=_ts;
   renderTabs(); applyStage(); setUrlTab();
